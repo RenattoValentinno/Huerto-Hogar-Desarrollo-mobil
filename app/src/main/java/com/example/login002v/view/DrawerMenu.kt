@@ -151,6 +151,8 @@ fun DrawerMenu(
                 .fillMaxWidth()
                 .padding(16.dp),//densidad de pixel
             textAlign = TextAlign.Center
+            //
+
         ) //fin text
 
 
