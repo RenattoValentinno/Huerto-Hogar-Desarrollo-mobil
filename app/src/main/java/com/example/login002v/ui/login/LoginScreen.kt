@@ -201,7 +201,8 @@ fun LoginScreen(
 
                 Button(onClick = {/* accion futura*/
                     vm.submit { user ->
-                        navController.navigate("muestraDatos/user")
+                        //navController.navigate("muestraDatos/user")
+                        navController.navigate("DrawerMenu/user")
                         // Navegar a una pantalla pasando el parametro
                         { // inicio navegar
                         popUpTo("login"){inclusive= true}
