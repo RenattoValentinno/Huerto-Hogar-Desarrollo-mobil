@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
+    kotlin("kapt")
 }
 
 android {
@@ -60,6 +62,10 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
 
 
+    // Dependencias Room
+    implementation("androidx.room:room-runtime:2.6.1")  // Versión actualizada
+    kapt("androidx.room:room-compiler:2.6.1")          // Misma versión
+    implementation("androidx.room:room-ktx:2.6.1")     // Misma versión
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
