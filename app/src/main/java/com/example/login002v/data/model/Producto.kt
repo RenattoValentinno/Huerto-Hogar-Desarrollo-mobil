@@ -7,11 +7,12 @@ import androidx.room.PrimaryKey
 data class Producto(
     @PrimaryKey(autoGenerate = true)
     val  id: Int=0,
-    val noombre:String,
+    val nombre:String,
     val precio:String,
     val cantidad:String,
+    val direccion:String,
     val conPapas:Boolean,
-    val agreandarBebida: Boolean
+    val agrandarBebida: Boolean
 
 
 )
