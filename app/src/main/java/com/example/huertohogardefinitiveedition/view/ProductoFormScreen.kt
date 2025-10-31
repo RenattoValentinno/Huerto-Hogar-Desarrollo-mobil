@@ -44,7 +44,8 @@ import com.example.huertohogardefinitiveedition.viewmodel.ProductoViewModel
 fun ProductoFormScreen(
     navController: NavController,
     nombre:String,
-    precio:String
+    precio:String,
+    descripcion: String
 ){// Inicio
 
     var cantidad by remember{ mutableStateOf(TextFieldValue("")) }
@@ -208,6 +209,7 @@ fun PreviewProductoFormScreen() {
     ProductoFormScreen(
         navController = rememberNavController(),
         nombre = "Producto Ejemplo",
-        precio = "$10.00"
+        precio = "$10.00",
+        descripcion = "Descripción del producto"
     )
 }

@@ -61,10 +61,11 @@ fun AppNav(hasCameraPermission: Boolean,
 ///  Ruta del Formulario:  ProductoFormScreen
 
         composable(
-            route="ProductoFormScreen/{nombre}/{precio}",
+            route="ProductoFormScreen/{nombre}/{precio}/{descripcion}",
             arguments = listOf(
                 navArgument("nombre"){ type= NavType.StringType },
                 navArgument("precio"){ type= NavType.StringType },
+                navArgument("descripcion"){ type= NavType.StringType },
             )//fin List Of
         ) // fin composable 3
 
@@ -72,8 +73,9 @@ fun AppNav(hasCameraPermission: Boolean,
                 backStackEntry ->
             val nombre = Uri.decode(backStackEntry.arguments?.getString("nombre") ?:"")
             val precio = backStackEntry.arguments?.getString("precio") ?:""
+            val descripcion = Uri.decode(backStackEntry.arguments?.getString("descripcion") ?: "")
 
-            ProductoFormScreen( navController= navController,  nombre=nombre,precio= precio )
+            ProductoFormScreen( navController= navController,  nombre=nombre,precio= precio, descripcion = descripcion )
         }
 
     }// Fin NavHost

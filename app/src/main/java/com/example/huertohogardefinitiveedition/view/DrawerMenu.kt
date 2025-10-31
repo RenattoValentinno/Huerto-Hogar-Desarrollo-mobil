@@ -1,314 +1,232 @@
 package com.example.huertohogardefinitiveedition.view
 
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Agriculture
-import androidx.compose.material.icons.filled.Fastfood
-import androidx.compose.material.icons.filled.Grass
-import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.LunchDining
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.animation.AnimatedVisibility // Importa esto
-import androidx.compose.foundation.clickable // Importa esto
-import androidx.compose.foundation.layout.Row // Importa esto
-import androidx.compose.material.icons.filled.ExpandLess // Importa esto
-import androidx.compose.material.icons.filled.ExpandMore // Importa esto
-import androidx.compose.runtime.getValue // Importa esto
-import androidx.compose.runtime.mutableStateOf // Importa esto
-import androidx.compose.runtime.remember // Importa esto
-import androidx.compose.runtime.setValue // Importa esto
-import androidx.compose.material.icons.filled.QrCodeScanner
+import com.example.huertohogardefinitiveedition.R // <-- CAMBIO 1: IMPORT AÑADIDO
+import com.example.huertohogardefinitiveedition.data.model.Categoria
+import com.example.huertohogardefinitiveedition.data.model.ProductoItem
+
+// --- CAMBIO 2: DATOS COMPLETADOS PARA TODOS LOS PRODUCTOS ---
+val listaDeCategorias = listOf(
+    Categoria(
+        nombre = "Frutas",
+        icono = Icons.Default.Agriculture,
+        productos = listOf(
+            ProductoItem(
+                nombre = "Manzanas Fuji",
+                precio = "1200",
+                descripcion = "Crujientes y dulces, perfectas para cualquier momento del día.",
+                imagenResId = R.drawable.logoduoc // Asegúrate de tener este archivo
+            ),
+            ProductoItem(
+                nombre = "Naranjas Valencia",
+                precio = "1000",
+                descripcion = "Jugo abundante y sabor cítrico ideal para zumos frescos.",
+                imagenResId = R.drawable.logoduoc // Asegúrate de tener este archivo
+            ),
+            ProductoItem(
+                nombre = "Plátanos Cavendish",
+                precio = "800",
+                descripcion = "Fuente natural de potasio y energía rápida.",
+                imagenResId = R.drawable.logoduoc // Usando una imagen genérica
+            )
+        )
+    ),
+    Categoria(
+        nombre = "Verduras",
+        icono = Icons.Default.Grass,
+        productos = listOf(
+            ProductoItem(
+                nombre = "Zanahorias Orgánicas",
+                precio = "900",
+                descripcion = "Ricas en betacaroteno, ideales para ensaladas y guisos.",
+                imagenResId = R.drawable.logoduoc // Asegúrate de tener este archivo
+            ),
+            ProductoItem(
+                nombre = "Espinacas Frescas",
+                precio = "700",
+                descripcion = "Llenas de hierro y nutrientes, perfectas para batidos y salteados.",
+                imagenResId = R.drawable.logoduoc
+            ),
+            ProductoItem(
+                nombre = "Pimientos Tricolores",
+                precio = "1500",
+                descripcion = "Un paquete con pimientos rojos, amarillos y verdes.",
+                imagenResId = R.drawable.logoduoc
+            )
+        )
+    ),
+    Categoria(
+        nombre = "Orgánicos",
+        icono = Icons.Default.Eco,
+        productos = listOf(
+            ProductoItem(
+                nombre = "Miel Orgánica",
+                precio = "5000",
+                descripcion = "Pura y sin filtrar, de flores silvestres de la patagonia.",
+                imagenResId = R.drawable.logoduoc
+            ),
+            ProductoItem(
+                nombre = "Quinua Orgánica",
+                precio = "5050",
+                descripcion = "Superalimento rico en proteínas y fibra, libre de gluten.",
+                imagenResId = R.drawable.logoduoc
+            )
+        )
+    ),
+    Categoria(
+        nombre = "Lácteos",
+        icono = Icons.Default.Icecream,
+        productos = listOf(
+            ProductoItem(
+                nombre = "Leche Entera",
+                precio = "1500",
+                descripcion = "Leche fresca y cremosa de vacas de pastoreo libre.",
+                imagenResId = R.drawable.logoduoc
+            )
+        )
+    )
+)
 
 @Composable
-
 fun DrawerMenu(
-    username:String,
+    username: String,
     navController: NavController
-){ // inicio
+) {
+    var categoriaSeleccionada by remember { mutableStateOf(listaDeCategorias.first()) }
 
-    Column(modifier =Modifier.fillMaxSize())
-    { //inicio columna
+    Column(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier =Modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
-                .background(MaterialTheme.colorScheme.primary)
-        ) // fin box
-        { //inicio contenido
+                .height(100.dp)
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.BottomStart
+        ) {
             Text(
-                text="Categorias user:$username",
-                style=MaterialTheme.typography.headlineSmall,
-                color= MaterialTheme.colorScheme.onPrimary,
-                modifier =Modifier
-                    .align(Alignment.BottomStart)
+                text = "Bienvenido, $username",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.padding(16.dp)
             )
-        } //fin contenido
+        }
 
-// LazyColumn: Crear la lista de delemnetos que se pueden desplazar verticalmente
-
-        LazyColumn( modifier =Modifier.weight(1f)){
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp)
+        ) {
             item {
-                NavigationDrawerItem(
-                    label = { Text("Escanear QR de Producto") },
+                FilterChip(
                     selected = false,
-                    onClick = {
-                        // Navega a la pantalla que activa la cámara para escanear
-                        // Asegúrate de que "QRScannerScreen" es el nombre correcto de tu ruta.
-                        navController.navigate("QRScannerScreen")
-                    },
-                    icon = { Icon(Icons.Default.QrCodeScanner, contentDescription = "Escanear QR") }
+                    onClick = { navController.navigate("QRScannerScreen") },
+                    label = { Text("Escanear") },
+                    leadingIcon = { Icon(Icons.Default.QrCodeScanner, contentDescription = "QR") }
                 )
             }
-
-            item {
-                // Estado para saber si la categoría de frutas está expandida
-                var frutasExpanded by remember { mutableStateOf(false) }
-
-                // El título de la categoría que se puede clickear
-                NavigationDrawerItem(
-                    label = { Text("Frutas Frescas") },
-                    selected = false,
-                    onClick = { frutasExpanded = !frutasExpanded }, // Cambia el estado
-                    icon = { Icon(Icons.Default.Agriculture, contentDescription = "Frutas") },
-                    // Añadimos un ícono para indicar si está expandido o no
-                    badge = {
-                        Icon(
-                            imageVector = if (frutasExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = "Expandir"
-                        )
-                    }
+            items(listaDeCategorias) { categoria ->
+                FilterChip(
+                    selected = (categoria.nombre == categoriaSeleccionada.nombre),
+                    onClick = { categoriaSeleccionada = categoria },
+                    label = { Text(categoria.nombre) },
+                    leadingIcon = { Icon(categoria.icono, contentDescription = categoria.nombre) }
                 )
+            }
+        }
 
-                // Contenido que se mostrará solo si está expandido
-                AnimatedVisibility(visible = frutasExpanded) {
-                    Column(modifier = Modifier.padding(start = 24.dp)) { // Padding para anidar
-                        NavigationDrawerItem(
-                            label = { Text("Manzanas Fuji") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Manzanas Fuji")
-                                val precio = "1200"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
+        // --- CAMBIO 3: TARJETA DE PRODUCTO MEJORADA ---
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(categoriaSeleccionada.productos) { producto ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    onClick = {
+                        val nombre = Uri.encode(producto.nombre)
+                        val precio = producto.precio
+                        val descripcion = Uri.encode(producto.descripcion)
+                        navController.navigate("ProductoFormScreen/$nombre/$precio/$descripcion")
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = producto.imagenResId),
+                            contentDescription = producto.nombre,
+                            modifier = Modifier
+                                .size(100.dp)
+                                .padding(8.dp),
+                            contentScale = ContentScale.Crop
                         )
-
-                        NavigationDrawerItem(
-                            label = { Text("Naranjas Valencia") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Naranjas Valencia")
-                                val precio = "1000"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text("Plátanos Cavendish") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Plátanos Cavendish")
-                                val precio = "800"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-                        // Aquí podrías añadir más frutas...
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = producto.nombre,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = producto.descripcion,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "$${producto.precio}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.End)
+                            )
+                        }
                     }
                 }
-            }// fin item 1
-
-            item {
-                // Estado para saber si la categoría de frutas está expandida
-                var verdurasExpanded by remember { mutableStateOf(false) }
-
-                // El título de la categoría que se puede clickear
-                NavigationDrawerItem(
-                    label = { Text("Verduras Orgánicas") },
-                    selected = false,
-                    onClick = { verdurasExpanded = !verdurasExpanded }, // Cambia el estado
-                    icon = { Icon(Icons.Default.Agriculture, contentDescription = "Verduras") },
-                    // Añadimos un ícono para indicar si está expandido o no
-                    badge = {
-                        Icon(
-                            imageVector = if (verdurasExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = "Expandir"
-                        )
-                    }
-                )
-
-                // Contenido que se mostrará solo si está expandido
-                AnimatedVisibility(visible = verdurasExpanded) {
-                    Column(modifier = Modifier.padding(start = 24.dp)) { // Padding para anidar
-                        NavigationDrawerItem(
-                            label = { Text("Zanahorias Orgánicas") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Zanahorias Orgánicas")
-                                val precio = "900"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text("Espinacas Frescas") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Espinacas Frescas")
-                                val precio = "700"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text("Pimientos Tricolores") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Pimientos Tricolores")
-                                val precio = "1500"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-                        // Aquí podrías añadir más frutas...
-                    }
-                }
-            }// fin item 2
-
-            item {
-                // Estado para saber si la categoría de Productos Orgánicos está expandida
-                var organicosExpanded by remember { mutableStateOf(false) }
-
-                // El título de la categoría que se puede clickear
-                NavigationDrawerItem(
-                    label = { Text("Productos Orgánicos") },
-                    selected = false,
-                    onClick = { organicosExpanded = !organicosExpanded }, // Cambia el estado
-                    icon = { Icon(Icons.Default.Agriculture, contentDescription = "Productos Orgánicos") },
-                    // Añadimos un ícono para indicar si está expandido o no
-                    badge = {
-                        Icon(
-                            imageVector = if (organicosExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = "Expandir"
-                        )
-                    }
-                )
-
-                // Contenido que se mostrará solo si está expandido
-                AnimatedVisibility(visible = organicosExpanded) {
-                    Column(modifier = Modifier.padding(start = 24.dp)) { // Padding para anidar
-                        NavigationDrawerItem(
-                            label = { Text("Miel Orgánica") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Miel Orgánica")
-                                val precio = "5000"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text("Quinua Orgánica") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Quinua Orgánica")
-                                val precio = "5050"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-                        // Aquí podrías añadir más Productos Orgánicos...
-                    }
-                }
-            }// fin item 3
-
-            item {
-                // Estado para saber si la categoría de lacteos está expandida
-                var lacteosExpanded by remember { mutableStateOf(false) }
-
-                // El título de la categoría que se puede clickear
-                NavigationDrawerItem(
-                    label = { Text("Productos Lácteos") },
-                    selected = false,
-                    onClick = { lacteosExpanded = !lacteosExpanded }, // Cambia el estado
-                    icon = { Icon(Icons.Default.Agriculture, contentDescription = "Lácteos") },
-                    // Añadimos un ícono para indicar si está expandido o no
-                    badge = {
-                        Icon(
-                            imageVector = if (lacteosExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                            contentDescription = "Expandir"
-                        )
-                    }
-                )
-
-                // Contenido que se mostrará solo si está expandido
-                AnimatedVisibility(visible = lacteosExpanded) {
-                    Column(modifier = Modifier.padding(start = 24.dp)) { // Padding para anidar
-                        NavigationDrawerItem(
-                            label = { Text("Leche Entera") },
-                            selected = false,
-                            onClick = {
-                                val nombre = Uri.encode("Leche Entera")
-                                val precio = "1500"
-                                navController.navigate("ProductoFormScreen/$nombre/$precio")
-                            },
-                            icon = { /* Puedes dejarlo vacío o poner un ícono pequeño */ }
-                        )
-                        // Aquí podrías añadir más lacteos...
-                    }
-                }
-            }// fin item 4
-
-
-        } // fin Lazy
-
-//Footer
+            }
+        }
 
         Text(
-            text="@ 2025 Huerto Hogar App",
-            style=MaterialTheme.typography.bodySmall,
-            modifier =Modifier
+            text = "@ 2025 Huerto Hogar App",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             textAlign = TextAlign.Center
-
         )
-
-
-    } //fin columna
-
-
-}// fin DrawerMenu
-
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
-
-
-fun DrawerMenuPreview(){
+fun DrawerMenuPreview() {
     val navController = androidx.navigation.compose.rememberNavController()
     DrawerMenu(username = "Usuario Prueba", navController = navController)
 }
