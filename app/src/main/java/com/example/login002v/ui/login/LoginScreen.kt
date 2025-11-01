@@ -3,6 +3,7 @@ package com.example.login002v.ui.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.material3.lightColorScheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,133 +59,105 @@ fun LoginScreen(
     val state =vm.uiState
     var showPass by remember { mutableStateOf(false) }
 
-    // darkColorScheme  es una funcion de material3 que define un color oscuro
-    val ColorScheme = darkColorScheme(
-        primary= Color(0xFF98222E),
-        onPrimary = Color.White,
-        onSurface = Color(0xFF333333), //Gris
-    ) // fin dark
-
+    // es una funcion de material3 que define un color claro
+    val ColorScheme = lightColorScheme(
+        primary   = Color(0xFF388E3C),  // verde bosque (botón)
+        onPrimary = Color.White,        // texto en botones
+        surface   = Color(0xFFF9F9FB),  // fondo claro general
+        onSurface = Color(0xFF3A3A3A)   // textos gris oscuro
+    )
 
     MaterialTheme(
         colorScheme = ColorScheme
     ){ // inicio Aplicar Material
 
-
-
         Scaffold (
-            // Crea Estuctra basica de la pantalla Se define topBar, BottomBar
-            topBar = {
-                TopAppBar(title = {Text("Mi Primer App",
-                    color =MaterialTheme.colorScheme.onPrimary,
-                )})
-
-                // Crea un AppBar con un titulo
-
-            }// fin topBar
+            //  Se define topBar, BottomBar (no necesaria)
         ) // fin Scaff
-        {// Inicio Inner
-                innerPadding ->
-            // Representa el espacio interno para que no choque con el topBar
 
+        {// Inicio Inner
+            innerPadding -> // Representa el espacio interno para que no choque con el topBar
             Column (  //   Colaca los elementos de la Ui
                 modifier = Modifier
-                    .padding( innerPadding)
-                    // Evita que quede oculto
-                    .fillMaxSize() // Hace que la columnna tome el todo el tamaño
+                    .padding( innerPadding) // Evita que quede oculto
+                    .fillMaxSize() // Hace que la columnna tome el pantalla completa
                     .padding(16.dp)
-                    .background(Color(0xFFF0F0F0)), // gris Claro
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally  // Centra horizontalmente
-                //Define  que elementos dentro la columna estaran separados por 20.dp
+                    .background(MaterialTheme.colorScheme.surface), // fondo del tema claro
+                verticalArrangement = Arrangement.Center,           // centra verticalmente
+                horizontalAlignment = Alignment.CenterHorizontally  // centra horizontalmente
             )// fin column
+
             {// inicio Contenido
-                Text(text="Bienvenido !",
-                    style= MaterialTheme.typography.headlineMedium,
-                    color=MaterialTheme.colorScheme.primary
-
-
+                Text(text="Bienvenido a Huerto Hogar!",
+                    fontSize = MaterialTheme.typography.headlineSmall.fontSize, // tamaño moderado
+                    fontWeight = FontWeight.SemiBold,                            // semi negrita elegante
+                    color = MaterialTheme.colorScheme.onSurface,                 // gris oscuro
+                    modifier = Modifier.padding(bottom = 24.dp)                  // espacio debajo
                 ) // Muestra un texto simple en la pantalla
 
-
-
-
                 Image(  // insertar una imagen en la interfaz
-                    painter= painterResource(id = R.drawable.logoduoc),
+                    painter = painterResource(id = R.drawable.logo_huerto_hogar),
                     contentDescription = "Logo App",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(150.dp),
+                        .fillMaxWidth() // Hace que la columnna tome el pantalla completa
+                        .height(150.dp) //alto
+                        .padding(bottom = 5.dp),  // deja espacio debajo del logo
                     contentScale = ContentScale.Fit
                     // Ajusta la imagen para que encaje dentro del espacio
+                )
 
-                ) // Fin Image
-
-
-// agregar un espacio entre la imagen y el boton
-
-                Spacer(modifier = Modifier.height(66.dp))
-
-
-
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                )// Fin Row
-                {// Aplica row
-                    Text("texto uno",
-                        style =MaterialTheme.typography.bodyLarge.copy(
-                            color=MaterialTheme.colorScheme.onSurface.copy(alpha=0.8f),
-                            fontWeight = FontWeight.Bold),
-                        modifier = Modifier
-                            .padding(end=8.dp)
-                    )// fin texto 1
-
-
-                    Text("texto dos",
-                        style =MaterialTheme.typography.bodyLarge.copy(
-                            color=MaterialTheme.colorScheme.onSurface.copy(alpha=0.8f),
-                            fontWeight = FontWeight.Bold),
-                        modifier = Modifier
-                            .padding(end=8.dp)
-                    )// fin texto 1
-
-
-                } // fin Aplica row
-
+                // agregar un espacio
+                Spacer(modifier = Modifier.height(30.dp))
 
                 OutlinedTextField(
                     value=state.username,
                     onValueChange = vm::onUsernameChange,
                     label={Text("Usuario")},
                     singleLine = true,
-                    modifier=Modifier.fillMaxWidth(0.95f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)                 // un poco más angosto para verse más limpio
+                        .padding(vertical = 4.dp),          // aire arriba/abajo
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor   = MaterialTheme.colorScheme.primary,      // borde al enfocar
+                        unfocusedBorderColor = Color(0xFFBDBDBD),               // borde suave sin foco
+                        cursorColor          = MaterialTheme.colorScheme.primary,      // color del cursor
+                        focusedLabelColor    = MaterialTheme.colorScheme.primary,      // label cuando hay foco
+                        unfocusedLabelColor  = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp) // esquinas suaves
                 )
 
                 OutlinedTextField(
-                    value=state.password,
+                    value = state.password,
                     onValueChange = vm::onPasswordChange,
-                    label={Text("Contraseña")},
+                    label = { Text("Contraseña") },
                     singleLine = true,
-                    visualTransformation = if (showPass) VisualTransformation.None else
-                        PasswordVisualTransformation(),
-
+                    visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        TextButton( onClick = {showPass =!showPass})
-                        {
-                            Text(if (showPass) "Ocultar" else "Ver")
+                        // ícono más compacto que el TextButton
+                        androidx.compose.material3.IconButton(onClick = { showPass = !showPass }) {
+                            val icon = if (showPass)
+                                androidx.compose.material.icons.Icons.Default.VisibilityOff
+                            else
+                                androidx.compose.material.icons.Icons.Default.Visibility
+                            androidx.compose.material3.Icon(icon, contentDescription = null)
                         }
-                    },// fin trail
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)                 // un poco más angosto para verse más limpio
+                        .padding(vertical = 4.dp),          // aire arriba/abajo
+                    colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor   = MaterialTheme.colorScheme.primary,      // borde al enfocar
+                        unfocusedBorderColor = Color(0xFFBDBDBD),               // borde suave sin foco
+                        cursorColor          = MaterialTheme.colorScheme.primary,      // color del cursor
+                        focusedLabelColor    = MaterialTheme.colorScheme.primary,      // label cuando hay foco
+                        unfocusedLabelColor  = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
+                )//password
 
-                            modifier=Modifier.fillMaxWidth(0.95f)
-
-                )// Password
-
-
-
+                // agregar un espacio
+                Spacer(modifier = Modifier.height(30.dp))
 
 
                 if (state.error !=null){
@@ -195,36 +171,64 @@ fun LoginScreen(
                 }
 
 
-// agregar un espacio entre la imagen y el boton
-
-                Spacer(modifier = Modifier.height(66.dp))
-
-                Button(onClick = {/* accion futura*/
-                    vm.submit { user ->
-                        //navController.navigate("muestraDatos/user")
-                        navController.navigate("DrawerMenu/user")
-                        // Navegar a una pantalla pasando el parametro
+                Button(onClick = {
+                    vm.submit { user -> navController.navigate("DrawerMenu/user")//navController.navigate("muestraDatos/user")
                         { // inicio navegar
-                        popUpTo("login"){inclusive= true}
-                            // No puede volver al login con Back
-
-                        // evite crear una nueva instancia
-                            launchSingleTop =true
+                            popUpTo("login"){ inclusive = true }  // No puede volver al login con Back
+                            launchSingleTop = true // Evita crear una nueva instancia
                         } // termino navegar
-
-                    }// fin submit
+                    } // fin submit
                 },
-                    enabled=!state.isLoading,
-                    modifier = Modifier.fillMaxWidth(0.6f)
-
-                )//fin button
-
-
+                    enabled = !state.isLoading,
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary, // color del botón
+                        contentColor = Color.White                          // color del texto
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50), // ovalado
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f) // ancho 60% de la pantalla
+                        .height(44.dp)      // altura cómoda para el botón
+                ) // fin button
                 {
-                   // Text("Presioname")
-                    Text(if(state.isLoading) "Validando" else "Iniciar Sesion" )
+                    // Texto del botón
+                    Text(
+                        if (state.isLoading) "Validando..." else "Iniciar Sesión"
+                    )
+                } // fin botón
 
-                } // fin boton
+                // agregar un espacio
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    //  Crear cuenta
+                    Text(
+                        text = "Crear cuenta",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold, //tipo de letra
+                        modifier = Modifier.clickable {
+                            // Acción te lleva a
+                            navController.navigate("registrarse") // o la ruta que tengas
+                        }
+                    )
+
+                    // Recuperar contraseña
+                    Text(
+                        text = "¿Olvidaste tu contraseña?",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold, //tipo de letra
+                        modifier = Modifier.clickable {
+                            // Acción te lleva a
+                            navController.navigate("recuperar_contrasena") // o tu pantalla de recuperación
+                        }
+                    )
+                }
+
 
 
 
