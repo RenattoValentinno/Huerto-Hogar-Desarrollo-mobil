@@ -61,10 +61,12 @@ fun LoginScreen(
 
     // es una funcion de material3 que define un color claro
     val ColorScheme = lightColorScheme(
-        primary   = Color(0xFF388E3C),  // verde bosque (botón)
-        onPrimary = Color.White,        // texto en botones
-        surface   = Color(0xFFF9F9FB),  // fondo claro general
-        onSurface = Color(0xFF3A3A3A)   // textos gris oscuro
+        primary    = Color(0xFF4CAF50),   //  Verde principal
+        onPrimary  = Color.White,                // Texto blanco sobre el verde
+        secondary  = Color(0xFFFF9800),    //  Naranjo secundario
+        onSecondary= Color.White,                 // Texto blanco sobre naranjo
+        surface    = Color(0xFFFFF8F5),   //  Fondo claro cálido
+        onSurface  = Color(0xFF3A3A3A)    // Texto gris oscuro sobre el fondo
     )
 
     MaterialTheme(
@@ -75,7 +77,7 @@ fun LoginScreen(
             //  Se define topBar, BottomBar (no necesaria)
         ) // fin Scaff
 
-        {// Inicio Inner
+        {
             innerPadding -> // Representa el espacio interno para que no choque con el topBar
             Column (  //   Colaca los elementos de la Ui
                 modifier = Modifier
@@ -118,10 +120,10 @@ fun LoginScreen(
                         .fillMaxWidth(0.9f)                 // un poco más angosto para verse más limpio
                         .padding(vertical = 4.dp),          // aire arriba/abajo
                     colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor   = MaterialTheme.colorScheme.primary,      // borde al enfocar
+                        focusedBorderColor   = MaterialTheme.colorScheme.secondary,      // borde al enfocar
                         unfocusedBorderColor = Color(0xFFBDBDBD),               // borde suave sin foco
-                        cursorColor          = MaterialTheme.colorScheme.primary,      // color del cursor
-                        focusedLabelColor    = MaterialTheme.colorScheme.primary,      // label cuando hay foco
+                        cursorColor          = MaterialTheme.colorScheme.secondary,      // color del cursor
+                        focusedLabelColor    = MaterialTheme.colorScheme.secondary,      // label cuando hay foco
                         unfocusedLabelColor  = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     ),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp) // esquinas suaves
@@ -147,10 +149,10 @@ fun LoginScreen(
                         .fillMaxWidth(0.9f)                 // un poco más angosto para verse más limpio
                         .padding(vertical = 4.dp),          // aire arriba/abajo
                     colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor   = MaterialTheme.colorScheme.primary,      // borde al enfocar
+                        focusedBorderColor   = MaterialTheme.colorScheme.secondary,      // borde al enfocar
                         unfocusedBorderColor = Color(0xFFBDBDBD),               // borde suave sin foco
-                        cursorColor          = MaterialTheme.colorScheme.primary,      // color del cursor
-                        focusedLabelColor    = MaterialTheme.colorScheme.primary,      // label cuando hay foco
+                        cursorColor          = MaterialTheme.colorScheme.secondary,      // color del cursor
+                        focusedLabelColor    = MaterialTheme.colorScheme.secondary,      // label cuando hay foco
                         unfocusedLabelColor  = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     ),
                     shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)

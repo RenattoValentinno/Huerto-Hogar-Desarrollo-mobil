@@ -12,20 +12,20 @@ import com.example.login002v.ui.home.MuestraDatosScreen
 import com.example.login002v.ui.login.LoginScreen
 import com.example.login002v.view.DrawerMenu
 import com.example.login002v.view.ProductoFormScreen
+import com.example.login002v.ui.registro.RegistrarseScreen
 
 @Composable
 
 
 fun AppNav(){
 
-    //reamos controlador
+    //veamos controlador
     val navController = rememberNavController()
-
     NavHost( navController= navController, startDestination = "login")
     {
         composable("login"){
             LoginScreen(navController= navController)
-        }//fin composable
+        }//fin composable 1
 
         //route="muestraDatos/{username}"
         composable(
@@ -35,8 +35,7 @@ fun AppNav(){
                     type= NavType.StringType
                 }
             )//fin List Of
-        )//fin composable
-
+        )//fin composable 2
         { // inicio
             backStackEntry ->
             val username = backStackEntry.arguments?.getString("username").orEmpty()
@@ -52,19 +51,24 @@ fun AppNav(){
                 navArgument("precio"){type= NavType.StringType },
             )//fin List Of
         )//fin composable 3
-        {
-
-            // inicio
+        {// inicio
                 backStackEntry ->
             val nombre = Uri.decode(backStackEntry.arguments?.getString("nombre") ?:"")
             val precio = backStackEntry.arguments?.getString("precio")?:""
 
-
-
             ProductoFormScreen(navController= navController, nombre =nombre,precio = precio )
         }
+        //ruta de registro usuario
+        composable("registrarse") {
+            RegistrarseScreen(navController = navController)
+        }
+
+
+
+
 
     }
+
 
 
 }//fin AppNav
