@@ -1,13 +1,15 @@
 package com.example.huertohogardefinitiveedition.data.model
 
+import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.vector.ImageVector
 
 // Representa un producto dentro de una categoría
 data class ProductoItem(
     val nombre: String,
     val precio: String,
-    val descripcion: String, // <-- Añadido
-    val imagenResId: Int     // <-- Añadido
+    val descripcion: String,
+    val stock: Int, // <-- ¡CAMBIO AÑADIDO!
+    @DrawableRes val imagenResId: Int
 )
 
 

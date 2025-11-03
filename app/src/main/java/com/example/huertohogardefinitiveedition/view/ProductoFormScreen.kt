@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +24,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.huertohogardefinitiveedition.data.database.PedidoHistorial
+import com.example.huertohogardefinitiveedition.data.model.Producto
 import com.example.huertohogardefinitiveedition.data.repository.ResenaRepository
 import com.example.huertohogardefinitiveedition.data.session.SessionManager
 import java.text.NumberFormat
@@ -29,53 +33,34 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// 🔹 Store en memoria para el historial
-import com.example.huertohogardefinitiveedition.data.database.PedidoHistorial
-import com.example.huertohogardefinitiveedition.data.model.Producto
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductoFormScreen(
     navController: NavController,
     nombre: String,
     precio: String,
-    descripcion: String
+    descripcion: String,
+    stock: Int
 ) {
     val context = LocalContext.current
     val usuarioActual = SessionManager.currentUser
+    val direccionPerfil = remember(usuarioActual) { usuarioActual?.direccion?.takeIf { it.isNotBlank() } ?: "Sin dirección" }
 
-    // 👉 Dirección desde el usuario (si no hay, “No especificada”)
-    // ✅ Dirección desde el usuario (segura y con fallback)
-    val direccionPerfil = remember(usuarioActual) {
-        val dir = try {
-            usuarioActual?.direccion
-        } catch (_: Throwable) {
-            null
-        }
-        if (dir.isNullOrBlank()) "Sin dirección" else dir
-    }
-
-    // --- ESTADOS DE LA PANTALLA ---
     var cantidad by remember { mutableStateOf("1") }
     var fechaEntrega by remember { mutableStateOf("") }
-
-    // --- ESTADOS PARA DIÁLOGOS ---
     var mostrarDialogoBoleta by remember { mutableStateOf(false) }
     var mostrarDialogoFecha by remember { mutableStateOf(false) }
     var mostrarDialogoResena by remember { mutableStateOf(false) }
 
-    // --- LÓGICA DE RESEÑAS ---
     var resenas by remember { mutableStateOf(ResenaRepository.obtenerResenasPorProducto(nombre)) }
-
-    // --- LÓGICA DE FECHAS ---
     val estadoFecha = rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
 
-    // --- LÓGICA DE CÁLCULO ---
     val precioBase = precio.toIntOrNull() ?: 0
     val cantidadNum = cantidad.toIntOrNull() ?: 0
     val total = precioBase * cantidadNum
     val formatoMoneda = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
 
+    // El LazyColumn es el contenedor principal que permite el scroll
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -84,112 +69,94 @@ fun ProductoFormScreen(
     ) {
         // --- SECCIÓN DE INFO DEL PRODUCTO Y COMPRA ---
         item {
-            Text(text = nombre, style = MaterialTheme.typography.headlineMedium)
-            Text(
-                text = "Precio Unitario: ${formatoMoneda.format(precioBase)}",
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                )
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) { // Agrupamos el contenido en una columna
+                Text(text = nombre, style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    text = descripcion,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp),
-                    textAlign = TextAlign.Justify
+                    text = "Precio Unitario: ${formatoMoneda.format(precioBase)}",
+                    style = MaterialTheme.typography.titleMedium
                 )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            OutlinedTextField(
-                value = cantidad,
-                onValueChange = {
-                    val nt = it.filter { c -> c.isDigit() }
-                    cantidad = if (nt.startsWith("0") && nt.length > 1) nt.substring(1) else nt
-                },
-                label = { Text("Cantidad") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OutlinedTextField(
-                value = fechaEntrega,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Fecha de Entrega") },
-                placeholder = { Text("Selecciona una fecha") },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "Seleccionar Fecha",
-                        modifier = Modifier.clickable { mostrarDialogoFecha = true }
+                Text(
+                    text = "Stock disponible: $stock unidades",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                ) {
+                    Text(
+                        text = descripcion,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(16.dp),
+                        textAlign = TextAlign.Justify
                     )
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                "Total a Pagar",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = formatoMoneda.format(total),
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.ExtraBold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    // ✅ Validación (sin 'direccion' en el form)
-                    if (cantidad.isBlank() || cantidadNum <= 0 || fechaEntrega.isBlank()) {
-                        Toast.makeText(
-                            context,
-                            "Debes completar la cantidad y la fecha",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@Button
-                    }
-                    // Abre el diálogo; el guardado se realiza al confirmar
-                    mostrarDialogoBoleta = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-            ) {
-                Text("Comprar Ahora", style = MaterialTheme.typography.titleMedium)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                OutlinedTextField(
+                    value = cantidad,
+                    onValueChange = { val nt = it.filter { c -> c.isDigit() }; cantidad = if (nt.startsWith("0") && nt.length > 1) nt.substring(1) else nt },
+                    label = { Text("Cantidad") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = fechaEntrega,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Fecha de Entrega") },
+                    placeholder = { Text("Selecciona una fecha") },
+                    trailingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.DateRange,
+                            contentDescription = "Seleccionar Fecha",
+                            modifier = Modifier.clickable { mostrarDialogoFecha = true }
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text("Total a Pagar", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(
+                    text = formatoMoneda.format(total),
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        if (cantidad.isBlank() || cantidadNum <= 0 || fechaEntrega.isBlank()) {
+                            Toast.makeText(context, "Debes completar la cantidad y la fecha", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        if (cantidadNum > stock) {
+                            Toast.makeText(context, "No hay suficiente stock. Solo quedan: $stock", Toast.LENGTH_LONG).show()
+                            return@Button
+                        }
+                        mostrarDialogoBoleta = true
+                    },
+                    modifier = Modifier.fillMaxWidth().height(50.dp)
+                ) {
+                    Text("Comprar Ahora", style = MaterialTheme.typography.titleMedium)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Divider()
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            Divider()
         }
 
         // --- SECCIÓN DE RESEÑAS ---
         item {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Reseñas y Calificaciones", style = MaterialTheme.typography.titleLarge)
                 if (usuarioActual != null) {
                     IconButton(onClick = { mostrarDialogoResena = true }) {
-                        Icon(Icons.Default.AddComment, contentDescription = "Añadir Reseña")
+                        Icon(Icons.Default.AddComment, "Añadir Reseña")
                     }
                 }
             }
@@ -199,11 +166,7 @@ fun ProductoFormScreen(
         // --- LISTA DE RESEÑAS ---
         if (resenas.isEmpty()) {
             item {
-                Text(
-                    "Este producto aún no tiene reseñas. ¡Sé el primero!",
-                    modifier = Modifier.padding(16.dp),
-                    color = Color.Gray
-                )
+                Text("Este producto aún no tiene reseñas. ¡Sé el primero!", modifier = Modifier.padding(16.dp), color = Color.Gray)
             }
         } else {
             items(resenas) { resena ->
@@ -212,21 +175,22 @@ fun ProductoFormScreen(
         }
     }
 
-    // --- DIÁLOGOS ---
+    // --- DIÁLOGOS --- (ESTA ERA LA PARTE QUE FALTABA)
 
     // Diálogo de Fecha
     if (mostrarDialogoFecha) {
         DatePickerDialog(
             onDismissRequest = { mostrarDialogoFecha = false },
             confirmButton = {
-                TextButton(onClick = {
-                    val millis = estadoFecha.selectedDateMillis
-                    if (millis != null) {
-                        fechaEntrega = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                            .format(Date(millis))
+                TextButton(
+                    onClick = {
+                        val millis = estadoFecha.selectedDateMillis
+                        if (millis != null) {
+                            fechaEntrega = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(millis))
+                        }
+                        mostrarDialogoFecha = false
                     }
-                    mostrarDialogoFecha = false
-                }) { Text("Aceptar") }
+                ) { Text("Aceptar") }
             },
             dismissButton = {
                 TextButton(onClick = { mostrarDialogoFecha = false }) { Text("Cancelar") }
@@ -236,18 +200,14 @@ fun ProductoFormScreen(
         }
     }
 
-    // 🔹 Diálogo de Boleta — mantiene tu Column y guarda en PedidoHistorial al confirmar
+    // Diálogo de Boleta
     if (mostrarDialogoBoleta) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoBoleta = false },
             title = { Text("🎉 Compra Realizada 🎉") },
             text = {
-                // 👉 Mantengo tu bloque tal cual
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "¡Gracias por tu compra, ${usuarioActual?.nombre ?: "Cliente"}!",
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text("¡Gracias por tu compra, ${usuarioActual?.nombre ?: "Cliente"}!", fontWeight = FontWeight.Bold)
                     Divider(modifier = Modifier.padding(vertical = 4.dp))
                     Text("Resumen del Pedido:")
                     Text(" • Producto: $nombre")
@@ -255,26 +215,26 @@ fun ProductoFormScreen(
                     Text(" • Dirección de Entrega: $direccionPerfil")
                     Text(" • Fecha de Entrega: $fechaEntrega", fontWeight = FontWeight.SemiBold)
                     Divider(modifier = Modifier.padding(vertical = 4.dp))
-                    Text(
-                        "Total Pagado: ${formatoMoneda.format(total)}",
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    Text("Total Pagado: ${formatoMoneda.format(total)}", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // ✅ Guardar en la lista en memoria (Historial)
+                        // 1. Calculamos el nuevo stock
+                        val nuevoStock = stock - cantidadNum
+
+                        // 2. Llamamos al repositorio para que actualice el valor
+                        ResenaRepository.actualizarStock(nombre, nuevoStock)
+
                         val pedido = Producto(
                             nombre = nombre,
                             precio = NumberFormat.getCurrencyInstance(Locale("es", "CL")).format(total),
-                            stock = 10, //numero cualquiera para evitar conflicto con modelo
+                            stock = 0, // Placeholder, ya que este modelo es para historial
                             cantidad = cantidadNum.toString(),
-                            direccion = direccionPerfil // ✅ ahora sin conflicto
+                            direccion = direccionPerfil
                         )
                         PedidoHistorial.agregar(pedido)
-
                         mostrarDialogoBoleta = false
                         navController.navigate("historial_pedidos")
                     }
@@ -286,7 +246,7 @@ fun ProductoFormScreen(
         )
     }
 
-    // Diálogo para Añadir Reseña (sin cambios)
+    // Diálogo para Añadir Reseña
     if (mostrarDialogoResena) {
         DialogoAnadirResena(
             onDismiss = { mostrarDialogoResena = false },
@@ -306,8 +266,8 @@ fun ProductoFormScreen(
         )
     }
 }
+// Pega este código al final de tu archivo view/ProductoFormScreen.kt
 
-// Composable para el diálogo de añadir reseña (sin cambios)
 @Composable
 private fun DialogoAnadirResena(
     onDismiss: () -> Unit,
@@ -346,6 +306,7 @@ private fun DialogoAnadirResena(
         },
         confirmButton = {
             Button(onClick = {
+                // Solo se puede publicar si se ha calificado y comentado
                 if (calificacion > 0 && comentario.isNotBlank()) {
                     onPublicar(calificacion, comentario)
                 }
@@ -356,3 +317,7 @@ private fun DialogoAnadirResena(
         }
     )
 }
+
+
+// ... El resto de los Composables (DialogoAnadirResena, etc.) no necesitan cambios ...
+

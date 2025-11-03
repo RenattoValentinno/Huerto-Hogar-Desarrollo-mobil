@@ -10,6 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,24 +25,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.huertohogardefinitiveedition.R
 import com.example.huertohogardefinitiveedition.data.model.Categoria
-import com.example.huertohogardefinitiveedition.data.model.Credential
 import com.example.huertohogardefinitiveedition.data.model.ProductoItem
 import com.example.huertohogardefinitiveedition.data.session.SessionManager
-private object Routes {
-    const val Login = "login"
-    const val GestionPerfil = "gestion"          // o "gestion_usuario"
-    const val GestionUsuarios = "gestion_usuarios"      // o "Gestion"
-    const val HistorialPedidos = "historial_pedidos"
-    const val QRScanner = "QRScannerScreen"
-    const val ProductoFormBase = "ProductoFormScreen"   // define tu destino con 3 args
-    const val Carrito = "carrito"
+import com.example.huertohogardefinitiveedition.data.model.Credential
 
-    const val Block = "block"
-
-    const val Resena = "resena"
-}
-
-//LISTA DE CATEGORÍAS Y PRODUCTOS
+//LISTA DE CATEGORÍAS Y PRODUCTOS (con stock)
 val listaDeCategorias = listOf(
     Categoria(
         nombre = "Frutas",
@@ -49,25 +38,22 @@ val listaDeCategorias = listOf(
             ProductoItem(
                 nombre = "Manzanas Fuji",
                 precio = "1200",
-                descripcion = "Manzanas Fuji crujientes y dulces, cultivadas en el Valle del Maule. \n" +
-                        "Perfectas para meriendas saludables o como ingrediente en postres. Estas manzanas \n" +
-                        "son conocidas por su textura firme y su sabor equilibrado entre dulce y ácido.",
+                descripcion = "Manzanas Fuji crujientes y dulces...",
+                stock = 50,
                 imagenResId = R.drawable.manzana_fuji
             ),
             ProductoItem(
                 nombre = "Naranjas Valencia",
                 precio = "1000",
-                descripcion = "Jugosas y ricas en vitamina C, estas naranjas Valencia son ideales para \n" +
-                        "zumos frescos y refrescantes. Cultivadas en condiciones climáticas óptimas que \n" +
-                        "aseguran su dulzura y jugosidad.",
+                descripcion = "Jugosas y ricas en vitamina C...",
+                stock = 30,
                 imagenResId = R.drawable.naranja_valencia
             ),
             ProductoItem(
                 nombre = "Plátanos Cavendish",
                 precio = "800",
-                descripcion = "Plátanos maduros y dulces, perfectos para el desayuno o como snack \n" +
-                        "energético. Estos plátanos son ricos en potasio y vitaminas, ideales para mantener una \n" +
-                        "dieta equilibrada.",
+                descripcion = "Plátanos maduros y dulces...",
+                stock = 100,
                 imagenResId = R.drawable.platano_cavendish
             )
         )
@@ -79,25 +65,22 @@ val listaDeCategorias = listOf(
             ProductoItem(
                 nombre = "Zanahorias Orgánicas",
                 precio = "900",
-                descripcion = "Zanahorias crujientes cultivadas sin pesticidas en la Región de O'Higgins. \n" +
-                        "Excelente fuente de vitamina A y fibra, ideales para ensaladas, jugos o como snack \n" +
-                        "saludable.",
+                descripcion = "Zanahorias crujientes cultivadas sin pesticidas...",
+                stock = 40,
                 imagenResId = R.drawable.zanahorias
             ),
             ProductoItem(
                 nombre = "Espinacas Frescas",
                 precio = "700",
-                descripcion = "Espinacas frescas y nutritivas, perfectas para ensaladas y batidos verdes. \n" +
-                        "Estas espinacas son cultivadas bajo prácticas orgánicas que garantizan su calidad y valor \n" +
-                        "nutricional.",
+                descripcion = "Espinacas frescas y nutritivas...",
+                stock = 25,
                 imagenResId = R.drawable.espinaca
             ),
             ProductoItem(
                 nombre = "Pimientos Tricolores",
                 precio = "1500",
-                descripcion = "Pimientos rojos, amarillos y verdes, ideales para salteados y platos \n" +
-                        "coloridos. Ricos en antioxidantes y vitaminas, estos pimientos añaden un toque vibrante \n" +
-                        "y saludable a cualquier receta.",
+                descripcion = "Pimientos rojos, amarillos y verdes...",
+                stock = 20,
                 imagenResId = R.drawable.pimientos
             )
         )
@@ -109,15 +92,15 @@ val listaDeCategorias = listOf(
             ProductoItem(
                 nombre = "Miel Orgánica",
                 precio = "5000",
-                descripcion = "Miel pura y orgánica producida por apicultores locales. Rica en \n" +
-                        "antioxidantes y con un sabor inigualable, perfecta para endulzar de manera natural tus \n" +
-                        "comidas y bebidas.",
+                descripcion = "Miel pura y orgánica producida por apicultores locales...",
+                stock = 15,
                 imagenResId = R.drawable.miel_organica
             ),
             ProductoItem(
                 nombre = "Quinua Orgánica",
                 precio = "5050",
                 descripcion = "Superalimento rico en proteínas y fibra, libre de gluten.",
+                stock = 35,
                 imagenResId = R.drawable.quinua_organica
             )
         )
@@ -130,6 +113,7 @@ val listaDeCategorias = listOf(
                 nombre = "Leche Entera",
                 precio = "1500",
                 descripcion = "Leche fresca y cremosa de vacas de pastoreo libre.",
+                stock = 40,
                 imagenResId = R.drawable.leche_entera
             )
         )
@@ -143,44 +127,33 @@ fun DrawerMenu(
     username: String,
     navController: NavController
 ) {
-    // Paleta de colores local
     val huertoHogarColors = lightColorScheme(
-        primary     = Color(0xFF4CAF50),
-        onPrimary   = Color.White,
-        secondary   = Color(0xFFFF9800),
+        primary = Color(0xFF4CAF50),
+        onPrimary = Color.White,
+        secondary = Color(0xFFFF9800),
         onSecondary = Color.White,
-        surface     = Color(0xFFFFF8F5),
-        onSurface   = Color(0xFF3A3A3A)
+        surface = Color(0xFFFFF8F5),
+        onSurface = Color(0xFF3A3A3A)
     )
 
-    // Sesión
     val current = SessionManager.currentUser
-    val displayName = when {
-        !current?.nombre.isNullOrBlank()  -> current!!.nombre
-        !current?.usuario.isNullOrBlank() -> current!!.usuario
-        else -> username
-    }
-    // Admin
+    val displayName = current?.nombre?.takeIf { it.isNotBlank() } ?: current?.usuario ?: username
     val isAdmin = (current?.idUsuario == Credential.Admin.idUsuario) || (current?.usuario?.equals(Credential.Admin.usuario, ignoreCase = true) == true)
 
-    // UI state
     var menuOpen by remember { mutableStateOf(false) }
     var categoriaSeleccionada by remember { mutableStateOf(listaDeCategorias.first()) }
 
     MaterialTheme(colorScheme = huertoHogarColors) {
         Scaffold(
-            // TOP APP BAR
             topBar = {
                 TopAppBar(
                     title = {
                         Column {
                             Text(
                                 text = "Perfil: $displayName",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onPrimary
+                                style = MaterialTheme.typography.titleMedium
                             )
-                            val correo = current?.correo
-                            if (!correo.isNullOrBlank()) {
+                            current?.correo?.takeIf { it.isNotBlank() }?.let { correo ->
                                 Text(
                                     text = correo,
                                     style = MaterialTheme.typography.bodySmall,
@@ -191,11 +164,7 @@ fun DrawerMenu(
                     },
                     actions = {
                         IconButton(onClick = { menuOpen = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Menú de perfil",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                            Icon(Icons.Default.MoreVert, "Menú de perfil")
                         }
                         DropdownMenu(
                             expanded = menuOpen,
@@ -203,55 +172,55 @@ fun DrawerMenu(
                         ) {
                             DropdownMenuItem(
                                 text = { Text("Mi Perfil") },
-                                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
+                                leadingIcon = { Icon(Icons.Default.Person, null) },
                                 onClick = {
                                     menuOpen = false
-                                    navController.navigate(Routes.GestionPerfil)
+                                    // RUTA CORREGIDA
+                                    navController.navigate("gestion_perfil")
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("Historial de pedidos") },
-                                leadingIcon = { Icon(Icons.Default.History, contentDescription = null) },
+                                leadingIcon = { Icon(Icons.Default.History, null) },
                                 onClick = {
                                     menuOpen = false
-                                    navController.navigate(Routes.HistorialPedidos)
+                                    navController.navigate("historial_pedidos")
                                 }
                             )
                             DropdownMenuItem(
                                 text = { Text("Block") },
-                                leadingIcon = { Icon(Icons.Default.Apps, contentDescription = null) },
+                                leadingIcon = { Icon(Icons.Default.Apps, null) },
                                 onClick = {
                                     menuOpen = false
-                                    navController.navigate(Routes.Block)
+                                    navController.navigate("block")
                                 }
                             )
-
                             DropdownMenuItem(
-                                text = { Text("Carrito (proximamente)") },
-                                leadingIcon = { Icon(Icons.Default.History, contentDescription = null) },
+                                text = { Text("Carrito (próximamente)") },
+                                leadingIcon = { Icon(Icons.Default.ShoppingCart, null) },
                                 onClick = {
                                     menuOpen = false
-                                    navController.navigate(Routes.Carrito)
+                                    navController.navigate("carrito")
                                 }
                             )
                             if (isAdmin) {
                                 DropdownMenuItem(
                                     text = { Text("Gestionar usuarios") },
-                                    leadingIcon = { Icon(Icons.Default.AdminPanelSettings, contentDescription = null) },
+                                    leadingIcon = { Icon(Icons.Default.AdminPanelSettings, null) },
                                     onClick = {
                                         menuOpen = false
-                                        navController.navigate(Routes.GestionUsuarios)
+                                        navController.navigate("gestion_usuarios")
                                     }
                                 )
                             }
                             Divider()
                             DropdownMenuItem(
                                 text = { Text("Cerrar sesión") },
-                                leadingIcon = { Icon(Icons.Default.Logout, contentDescription = null) },
+                                leadingIcon = { Icon(Icons.Default.Logout, null) },
                                 onClick = {
                                     menuOpen = false
                                     SessionManager.logout()
-                                    navController.navigate(Routes.Login) {
+                                    navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }
                                         launchSingleTop = true
                                     }
@@ -260,21 +229,16 @@ fun DrawerMenu(
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 )
             }
         ) { innerPadding ->
-
-            //categorías + productos
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                // categorías + botón QR
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -285,9 +249,9 @@ fun DrawerMenu(
                     item {
                         FilterChip(
                             selected = false,
-                            onClick = { navController.navigate(Routes.QRScanner) },
+                            onClick = { navController.navigate("QRScannerScreen") },
                             label = { Text("Escanear") },
-                            leadingIcon = { Icon(Icons.Default.QrCodeScanner, contentDescription = "QR") }
+                            leadingIcon = { Icon(Icons.Default.QrCodeScanner, "QR") }
                         )
                     }
                     items(listaDeCategorias) { categoria ->
@@ -295,12 +259,11 @@ fun DrawerMenu(
                             selected = (categoria.nombre == categoriaSeleccionada.nombre),
                             onClick = { categoriaSeleccionada = categoria },
                             label = { Text(categoria.nombre) },
-                            leadingIcon = { Icon(categoria.icono, contentDescription = categoria.nombre) }
+                            leadingIcon = { Icon(categoria.icono, categoria.nombre) }
                         )
                     }
                 }
 
-                // Lista de productos por categoría
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(categoriaSeleccionada.productos) { producto ->
                         Card(
@@ -312,8 +275,9 @@ fun DrawerMenu(
                                 val nombreNav = Uri.encode(producto.nombre)
                                 val precioNav = producto.precio
                                 val descripcionNav = Uri.encode(producto.descripcion)
+                                // RUTA CORREGIDA - AHORA PASA EL STOCK
                                 navController.navigate(
-                                    "${Routes.ProductoFormBase}/$nombreNav/$precioNav/$descripcionNav"
+                                    "ProductoFormScreen/$nombreNav/$precioNav/$descripcionNav/${producto.stock}"
                                 )
                             }
                         ) {
@@ -334,17 +298,9 @@ fun DrawerMenu(
                                         .weight(1f)
                                         .padding(vertical = 8.dp)
                                 ) {
-                                    Text(
-                                        text = producto.nombre,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                    Text(text = producto.nombre, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                     Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = producto.descripcion,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        maxLines = 2
-                                    )
+                                    Text(text = producto.descripcion, style = MaterialTheme.typography.bodySmall, maxLines = 2)
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
                                         text = "$${producto.precio}",
@@ -359,7 +315,6 @@ fun DrawerMenu(
                     }
                 }
 
-                // Footer
                 Text(
                     text = "@ 2025 Huerto Hogar App",
                     style = MaterialTheme.typography.bodySmall,
