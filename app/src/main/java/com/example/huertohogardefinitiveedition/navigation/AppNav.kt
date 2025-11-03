@@ -23,6 +23,7 @@ import com.example.huertohogardefinitiveedition.view.DrawerMenu
 import com.example.huertohogardefinitiveedition.view.ProductoFormScreen
 import com.example.huertohogardefinitiveedition.view.QrScannerScreen
 import com.example.huertohogardefinitiveedition.viewmodel.QrViewModel
+import com.example.huertohogardefinitiveedition.view.BlockScreen
 
 
 
@@ -89,8 +90,7 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
 
         // Gestión historial pedidos
         composable("historial_pedidos") {
-
-            GestionPerfilScreen(navController = navController)
+            com.example.huertohogardefinitiveedition.view.HistorialPedidosScreen()
         }
 
         // Desde el menú de DrawerMenu (para Admin)
@@ -107,7 +107,7 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
         composable("block") {
             //remplazar quien tenga esa parte
 
-            SimpleStub("Pantalla: block")
+            com.example.huertohogardefinitiveedition.view.BlockScreen()
         }
 
 
