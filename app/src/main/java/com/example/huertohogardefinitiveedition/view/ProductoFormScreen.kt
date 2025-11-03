@@ -1,215 +1,156 @@
 package com.example.huertohogardefinitiveedition.view
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.huertohogardefinitiveedition.data.model.Producto
+import com.example.huertohogardefinitiveedition.data.session.SessionManager
 import com.example.huertohogardefinitiveedition.viewmodel.ProductoViewModel
+import java.text.NumberFormat
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun ProductoFormScreen(
     navController: NavController,
-    nombre:String,
-    precio:String,
-    descripcion: String
-){// Inicio
+    nombre: String,
+    precio: String,
+    descripcion: String,
+    vm: ProductoViewModel = viewModel() // Mantenemos el ViewModel por si se usa en el futuro
+) {
+    val context = LocalContext.current
 
-    var cantidad by remember{ mutableStateOf(TextFieldValue("")) }
-    var direccion by remember{ mutableStateOf(TextFieldValue("")) }
+    // --- ESTADOS DE LA PANTALLA ---
+    var cantidad by remember { mutableStateOf("1") }
+    var direccion by remember { mutableStateOf("") }
+    // ¡NUEVO! Estado para controlar la visibilidad del diálogo de la boleta
+    var mostrarDialogoBoleta by remember { mutableStateOf(false) }
 
+    // --- LÓGICA DE CÁLCULO ---
+    val precioBase = precio.toIntOrNull() ?: 0
+    val cantidadNum = cantidad.toIntOrNull() ?: 0
+    val total = precioBase * cantidadNum
+    val formatoMoneda = remember { NumberFormat.getCurrencyInstance(Locale("es", "CL")) }
 
-    // coneccion a viewmodel
+    // Obtenemos el nombre del usuario desde la sesión para la boleta
+    val nombreUsuario = SessionManager.currentUser?.nombre ?: "Cliente"
 
-    val viewModel: ProductoViewModel =viewModel()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = nombre, style = MaterialTheme.typography.headlineMedium)
+        Text(text = "Precio Unitario: ${formatoMoneda.format(precioBase)}", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(16.dp))
 
-    // Observar los datos en tiempo real
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        ) {
+            Text(
+                text = descripcion,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(16.dp),
+                textAlign = TextAlign.Justify
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
 
-    val productos:List<Producto> by viewModel.productos.collectAsState()
+        OutlinedTextField(
+            value = cantidad,
+            onValueChange = {
+                val newText = it.filter { char -> char.isDigit() }
+                cantidad = if (newText.startsWith("0") && newText.length > 1) newText.substring(1) else newText
+            },
+            label = { Text("Cantidad") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
+        OutlinedTextField(
+            value = direccion,
+            onValueChange = { direccion = it },
+            label = { Text("Dirección de entrega") },
+            placeholder = { Text("Ej: Av. Siempreviva 742") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(24.dp))
 
-    Scaffold (
-        bottomBar = {
-            BottomAppBar {
-                // Contenido Barra superior
-            } // fin Bootom App
-        }// fin bottom
+        Text("Total a Pagar", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Text(
+            text = formatoMoneda.format(total),
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.ExtraBold
+        )
+        Spacer(modifier = Modifier.weight(1f))
 
-    ) // fin Scaffold
+        Button(
+            onClick = {
+                // Validaciones antes de mostrar la boleta
+                if (cantidad.isBlank() || cantidadNum <= 0) {
+                    Toast.makeText(context, "La cantidad debe ser mayor a cero", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                if (direccion.isBlank()) {
+                    Toast.makeText(context, "La dirección es obligatoria", Toast.LENGTH_SHORT).show()
+                    return@Button
+                }
+                // ¡NUEVO! En lugar de navegar, mostramos el diálogo
+                mostrarDialogoBoleta = true
+            },
+            modifier = Modifier.fillMaxWidth().height(50.dp)
+        ) {
+            Text("Comprar Ahora", style = MaterialTheme.typography.titleMedium)
+        }
+    }
 
-    {// inicio inner
-            innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(16.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        )// fin Column
-        { // Inicio Contenido
-
-            Image(
-                painter= painterResource(id= android.R.drawable.ic_menu_gallery),
-                contentDescription = "Imagen Producto",
-                modifier=Modifier
-                    .height(150.dp)
-                    .fillMaxWidth()
-            )// fin Image
-
-            Spacer(modifier =Modifier.height(16.dp))
-
-            Text(text=nombre, style= MaterialTheme.typography.headlineSmall)
-            Text(text="Precio: $precio", style= MaterialTheme.typography.bodyLarge)
-
-            Spacer(modifier =Modifier.height(16.dp))
-
-
-            OutlinedTextField(
-                value=cantidad,
-                onValueChange = {cantidad = it},
-                //OutlinedTextField es un componente de entrada de texto
-                // se utiliza para permitir que el usuario ingrese un valor.
-
-                label ={Text("Cantidad")},
-                modifier = Modifier.fillMaxWidth()
-            ) // fin cantidad
-
-            OutlinedTextField(
-                value=direccion,
-                onValueChange = {direccion = it},
-                //OutlinedTextField es un componente de entrada de texto
-                // se utiliza para permitir que el usuario ingrese un valor.
-
-                label ={Text("Direccion")},
-                modifier = Modifier.fillMaxWidth()
-            ) // fin direccion
-
-            Spacer(modifier =Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    val producto =Producto(
-                        nombre=nombre,
-                        precio =precio,
-                        cantidad = cantidad.text,
-                        direccion=direccion.text
+    // --- ¡NUEVO! DIÁLOGO DE BOLETA ---
+    if (mostrarDialogoBoleta) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoBoleta = false },
+            title = { Text("🎉 Compra Realizada 🎉") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("¡Gracias por tu compra, $nombreUsuario!", fontWeight = FontWeight.Bold)
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
+                    Text("Resumen del Pedido:")
+                    Text(" • Producto: $nombre")
+                    Text(" • Cantidad: $cantidadNum")
+                    Text(" • Dirección de Entrega: $direccion")
+                    Divider(modifier = Modifier.padding(vertical = 4.dp))
+                    Text(
+                        "Total Pagado: ${formatoMoneda.format(total)}",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
-                    // hace la magia
-                    viewModel.guardarProducto(producto)
-
-                    // limpiar datos
-                    cantidad = TextFieldValue("")
-                    direccion = TextFieldValue("")
-
-
-                },
-                enabled=cantidad.text.isNotBlank() && direccion.text.isNotBlank()
-            ) // fin Button
-            { // inicio texto
-                Text("Confirmar Pedido")
-            }// fin texto
-
-
-            Spacer(modifier =Modifier.height(16.dp))
-
-// Mostrar los Productos guardados
-
-            Text("Pedidos realizados: ", style = MaterialTheme.typography.headlineSmall    )
-
-            if(productos.isNotEmpty()){
-
-                LazyColumn(modifier= Modifier.weight(1f)){
-
-                    items(productos){ producto ->
-                        Card(
-                            modifier= Modifier
-                                .fillMaxWidth()
-                                .padding(4.dp)
-                        )
-                        { //   Inicio del contenido
-
-                            Text(
-                                text="${producto.nombre} - ${producto.precio}",
-                                style = MaterialTheme.typography.bodyLarge
-                            ) // fin text 1
-
-                            Text(
-                                text="Cantidad: ${producto.cantidad}  ",
-                                style = MaterialTheme.typography.bodyMedium
-                            ) // fin text 2
-
-                            Text(
-                                text="Direccion: ${producto.direccion}  ",
-                                style = MaterialTheme.typography.bodyMedium
-                            ) // fin text 3
-
-                        }//   fin del contenido
-
-
-
-                    }// fin items
-                }// fin Lazy
-
-            }//fin if
-            else {
-                Text("No hay pedidos realizados",
-                    modifier= Modifier.weight(1f) ,
-                    style = MaterialTheme.typography.bodyMedium
-
-                )
-
-
-
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        mostrarDialogoBoleta = false
+                        // Ahora sí, después de aceptar la boleta, volvemos al menú
+                        navController.popBackStack()
+                    }
+                ) {
+                    Text("Aceptar")
+                }
             }
-
-        } //Fin Contenido
-
-    } // fin inner
-
-}//fin
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewProductoFormScreen() {
-    // Preview básico para testing
-    ProductoFormScreen(
-        navController = rememberNavController(),
-        nombre = "Producto Ejemplo",
-        precio = "$10.00",
-        descripcion = "Descripción del producto"
-    )
+        )
+    }
 }

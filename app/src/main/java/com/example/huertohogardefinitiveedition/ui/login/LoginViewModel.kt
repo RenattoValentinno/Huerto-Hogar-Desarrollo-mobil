@@ -4,36 +4,29 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.huertohogardefinitiveedition.data.repository.AuthRepository
 
-class LoginViewModel (
-    private val repo: AuthRepository= AuthRepository()
-): ViewModel(){
+class LoginViewModel : ViewModel() {
 
-    var uiState by mutableStateOf(LoginUiState())
+    data class UiState(
+        val username: String = "",
+        val password: String = "",
+        val isLoading: Boolean = false,
+        val error: String? = null
+    )
 
-    fun onUsernameChange(value:String){
-        uiState=uiState.copy(username=value, error=null)
+    var uiState by mutableStateOf(UiState())
+        private set
+
+    fun onUsernameChange(newValue: String) {
+        uiState = uiState.copy(username = newValue, error = null)
     }
 
-    fun onPasswordChange(value:String){
-        uiState=uiState.copy(password=value, error=null)
-    }
-// Funciones de actualizacion que se llaman desde TextFiel de la Ui
-
-
-    fun submit(onSuccess:(String) -> Unit){
-        uiState =uiState.copy(isLoading=true, error=null)
-
-        val oK = repo.login(uiState.username.trim(), uiState.password)
-
-        uiState =uiState.copy(isLoading=false, error=null)
-
-        if(oK) onSuccess(uiState.username.trim())
-        else uiState =uiState.copy(error="Credenciales Invalidas")
-
+    fun onPasswordChange(newValue: String) {
+        uiState = uiState.copy(password = newValue, error = null)
     }
 
-
-
-}// fin viewmodel
+    // Función simple para mostrar errores desde la UI
+    fun setError(message: String?) {
+        uiState = uiState.copy(error = message)
+    }
+}
