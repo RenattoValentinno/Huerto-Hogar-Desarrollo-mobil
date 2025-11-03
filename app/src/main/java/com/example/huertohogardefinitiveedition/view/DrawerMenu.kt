@@ -49,20 +49,26 @@ val listaDeCategorias = listOf(
             ProductoItem(
                 nombre = "Manzanas Fuji",
                 precio = "1200",
-                descripcion = "Crujientes y dulces, perfectas para cualquier momento del día.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Manzanas Fuji crujientes y dulces, cultivadas en el Valle del Maule. \n" +
+                        "Perfectas para meriendas saludables o como ingrediente en postres. Estas manzanas \n" +
+                        "son conocidas por su textura firme y su sabor equilibrado entre dulce y ácido.",
+                imagenResId = R.drawable.manzana_fuji
             ),
             ProductoItem(
                 nombre = "Naranjas Valencia",
                 precio = "1000",
-                descripcion = "Jugo abundante y sabor cítrico ideal para zumos frescos.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Jugosas y ricas en vitamina C, estas naranjas Valencia son ideales para \n" +
+                        "zumos frescos y refrescantes. Cultivadas en condiciones climáticas óptimas que \n" +
+                        "aseguran su dulzura y jugosidad.",
+                imagenResId = R.drawable.naranja_valencia
             ),
             ProductoItem(
                 nombre = "Plátanos Cavendish",
                 precio = "800",
-                descripcion = "Fuente natural de potasio y energía rápida.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Plátanos maduros y dulces, perfectos para el desayuno o como snack \n" +
+                        "energético. Estos plátanos son ricos en potasio y vitaminas, ideales para mantener una \n" +
+                        "dieta equilibrada.",
+                imagenResId = R.drawable.platano_cavendish
             )
         )
     ),
@@ -73,20 +79,26 @@ val listaDeCategorias = listOf(
             ProductoItem(
                 nombre = "Zanahorias Orgánicas",
                 precio = "900",
-                descripcion = "Ricas en betacaroteno, ideales para ensaladas y guisos.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Zanahorias crujientes cultivadas sin pesticidas en la Región de O'Higgins. \n" +
+                        "Excelente fuente de vitamina A y fibra, ideales para ensaladas, jugos o como snack \n" +
+                        "saludable.",
+                imagenResId = R.drawable.zanahorias
             ),
             ProductoItem(
                 nombre = "Espinacas Frescas",
                 precio = "700",
-                descripcion = "Llenas de hierro y nutrientes, perfectas para batidos y salteados.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Espinacas frescas y nutritivas, perfectas para ensaladas y batidos verdes. \n" +
+                        "Estas espinacas son cultivadas bajo prácticas orgánicas que garantizan su calidad y valor \n" +
+                        "nutricional.",
+                imagenResId = R.drawable.espinaca
             ),
             ProductoItem(
                 nombre = "Pimientos Tricolores",
                 precio = "1500",
-                descripcion = "Un paquete con pimientos rojos, amarillos y verdes.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Pimientos rojos, amarillos y verdes, ideales para salteados y platos \n" +
+                        "coloridos. Ricos en antioxidantes y vitaminas, estos pimientos añaden un toque vibrante \n" +
+                        "y saludable a cualquier receta.",
+                imagenResId = R.drawable.pimientos
             )
         )
     ),
@@ -97,14 +109,16 @@ val listaDeCategorias = listOf(
             ProductoItem(
                 nombre = "Miel Orgánica",
                 precio = "5000",
-                descripcion = "Pura y sin filtrar, de flores silvestres de la patagonia.",
-                imagenResId = R.drawable.logoduoc
+                descripcion = "Miel pura y orgánica producida por apicultores locales. Rica en \n" +
+                        "antioxidantes y con un sabor inigualable, perfecta para endulzar de manera natural tus \n" +
+                        "comidas y bebidas.",
+                imagenResId = R.drawable.miel_organica
             ),
             ProductoItem(
                 nombre = "Quinua Orgánica",
                 precio = "5050",
                 descripcion = "Superalimento rico en proteínas y fibra, libre de gluten.",
-                imagenResId = R.drawable.logoduoc
+                imagenResId = R.drawable.quinua_organica
             )
         )
     ),
@@ -116,7 +130,7 @@ val listaDeCategorias = listOf(
                 nombre = "Leche Entera",
                 precio = "1500",
                 descripcion = "Leche fresca y cremosa de vacas de pastoreo libre.",
-                imagenResId = R.drawable.logoduoc
+                imagenResId = R.drawable.leche_entera
             )
         )
     )
