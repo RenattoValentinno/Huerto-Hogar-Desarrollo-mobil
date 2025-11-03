@@ -3,7 +3,6 @@ package com.example.huertohogardefinitiveedition.data.session
 import com.example.huertohogardefinitiveedition.data.model.Credential
 
 object SessionManager {
-
     // Usuario autenticado en memoria (para toda la app)
     var currentUser: Credential? = null
         private set
