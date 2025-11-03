@@ -21,112 +21,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.huertohogardefinitiveedition.R
-import com.example.huertohogardefinitiveedition.data.model.Categoria
-import com.example.huertohogardefinitiveedition.data.model.ProductoItem
-import com.example.huertohogardefinitiveedition.data.session.SessionManager
 import com.example.huertohogardefinitiveedition.data.model.Credential
+import com.example.huertohogardefinitiveedition.data.session.SessionManager
+import com.example.huertohogardefinitiveedition.viewmodel.DrawerMenuViewModel
 
-//LISTA DE CATEGORÍAS Y PRODUCTOS (con stock)
-val listaDeCategorias = listOf(
-    Categoria(
-        nombre = "Frutas",
-        icono = Icons.Default.Agriculture,
-        productos = listOf(
-            ProductoItem(
-                nombre = "Manzanas Fuji",
-                precio = "1200",
-                descripcion = "Manzanas Fuji crujientes y dulces...",
-                stock = 50,
-                imagenResId = R.drawable.manzana_fuji
-            ),
-            ProductoItem(
-                nombre = "Naranjas Valencia",
-                precio = "1000",
-                descripcion = "Jugosas y ricas en vitamina C...",
-                stock = 30,
-                imagenResId = R.drawable.naranja_valencia
-            ),
-            ProductoItem(
-                nombre = "Plátanos Cavendish",
-                precio = "800",
-                descripcion = "Plátanos maduros y dulces...",
-                stock = 100,
-                imagenResId = R.drawable.platano_cavendish
-            )
-        )
-    ),
-    Categoria(
-        nombre = "Verduras",
-        icono = Icons.Default.Grass,
-        productos = listOf(
-            ProductoItem(
-                nombre = "Zanahorias Orgánicas",
-                precio = "900",
-                descripcion = "Zanahorias crujientes cultivadas sin pesticidas...",
-                stock = 40,
-                imagenResId = R.drawable.zanahorias
-            ),
-            ProductoItem(
-                nombre = "Espinacas Frescas",
-                precio = "700",
-                descripcion = "Espinacas frescas y nutritivas...",
-                stock = 25,
-                imagenResId = R.drawable.espinaca
-            ),
-            ProductoItem(
-                nombre = "Pimientos Tricolores",
-                precio = "1500",
-                descripcion = "Pimientos rojos, amarillos y verdes...",
-                stock = 20,
-                imagenResId = R.drawable.pimientos
-            )
-        )
-    ),
-    Categoria(
-        nombre = "Orgánicos",
-        icono = Icons.Default.Eco,
-        productos = listOf(
-            ProductoItem(
-                nombre = "Miel Orgánica",
-                precio = "5000",
-                descripcion = "Miel pura y orgánica producida por apicultores locales...",
-                stock = 15,
-                imagenResId = R.drawable.miel_organica
-            ),
-            ProductoItem(
-                nombre = "Quinua Orgánica",
-                precio = "5050",
-                descripcion = "Superalimento rico en proteínas y fibra, libre de gluten.",
-                stock = 35,
-                imagenResId = R.drawable.quinua_organica
-            )
-        )
-    ),
-    Categoria(
-        nombre = "Lácteos",
-        icono = Icons.Default.Icecream,
-        productos = listOf(
-            ProductoItem(
-                nombre = "Leche Entera",
-                precio = "1500",
-                descripcion = "Leche fresca y cremosa de vacas de pastoreo libre.",
-                stock = 40,
-                imagenResId = R.drawable.leche_entera
-            )
-        )
-    )
-)
-
+// LA LISTA DE CATEGORÍAS YA NO VIVE AQUÍ, SE HA MOVIDO AL VIEWMODEL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawerMenu(
     username: String,
-    navController: NavController
+    navController: NavController,
+    // Se inyecta el ViewModel. Compose se encargará de crear y mantener una única instancia.
+    viewModel: DrawerMenuViewModel
 ) {
+    // Leemos el estado del ViewModel. Compose observará cambios en esta variable.
+    val categoriasState = viewModel.categorias.value
+
     val huertoHogarColors = lightColorScheme(
         primary = Color(0xFF4CAF50),
         onPrimary = Color.White,
@@ -141,7 +56,15 @@ fun DrawerMenu(
     val isAdmin = (current?.idUsuario == Credential.Admin.idUsuario) || (current?.usuario?.equals(Credential.Admin.usuario, ignoreCase = true) == true)
 
     var menuOpen by remember { mutableStateOf(false) }
-    var categoriaSeleccionada by remember { mutableStateOf(listaDeCategorias.first()) }
+    // La categoría seleccionada ahora depende del estado que viene del ViewModel.
+    // Usamos 'LaunchedEffect' para actualizarla si la lista cambia.
+    var categoriaSeleccionada by remember { mutableStateOf(categoriasState.first()) }
+    LaunchedEffect(categoriasState) {
+        if (!categoriasState.contains(categoriaSeleccionada)) {
+            categoriaSeleccionada = categoriasState.first()
+        }
+    }
+
 
     MaterialTheme(colorScheme = huertoHogarColors) {
         Scaffold(
@@ -175,7 +98,6 @@ fun DrawerMenu(
                                 leadingIcon = { Icon(Icons.Default.Person, null) },
                                 onClick = {
                                     menuOpen = false
-                                    // RUTA CORREGIDA
                                     navController.navigate("gestion_perfil")
                                 }
                             )
@@ -254,7 +176,8 @@ fun DrawerMenu(
                             leadingIcon = { Icon(Icons.Default.QrCodeScanner, "QR") }
                         )
                     }
-                    items(listaDeCategorias) { categoria ->
+                    // El LazyRow ahora itera sobre el estado que viene del ViewModel
+                    items(categoriasState) { categoria ->
                         FilterChip(
                             selected = (categoria.nombre == categoriaSeleccionada.nombre),
                             onClick = { categoriaSeleccionada = categoria },
@@ -264,6 +187,7 @@ fun DrawerMenu(
                     }
                 }
 
+                // El LazyColumn itera sobre los productos de la categoría seleccionada
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(categoriaSeleccionada.productos) { producto ->
                         Card(
@@ -275,7 +199,7 @@ fun DrawerMenu(
                                 val nombreNav = Uri.encode(producto.nombre)
                                 val precioNav = producto.precio
                                 val descripcionNav = Uri.encode(producto.descripcion)
-                                // RUTA CORREGIDA - AHORA PASA EL STOCK
+                                // Pasamos el stock actual al navegar
                                 navController.navigate(
                                     "ProductoFormScreen/$nombreNav/$precioNav/$descripcionNav/${producto.stock}"
                                 )
@@ -302,6 +226,13 @@ fun DrawerMenu(
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(text = producto.descripcion, style = MaterialTheme.typography.bodySmall, maxLines = 2)
                                     Spacer(modifier = Modifier.height(8.dp))
+                                    // Mostramos el stock actual del producto
+                                    Text(
+                                        text = "Quedan: ${producto.stock}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (producto.stock < 10) Color.Red else Color.Gray,
+                                        modifier = Modifier.align(Alignment.Start)
+                                    )
                                     Text(
                                         text = "$${producto.precio}",
                                         style = MaterialTheme.typography.bodyLarge,
@@ -332,5 +263,13 @@ fun DrawerMenu(
 @Composable
 fun DrawerMenuPreview() {
     val navController = rememberNavController()
-    DrawerMenu(username = "Usuario Prueba", navController = navController)
+    // ¡AQUÍ ESTÁ LA CORRECCIÓN!
+    // Creamos una instancia del ViewModel para poder pasársela a la previsualización.
+    val previewViewModel = DrawerMenuViewModel()
+
+    DrawerMenu(
+        username = "Usuario Prueba",
+        navController = navController,
+        viewModel = previewViewModel // Le pasamos la instancia creada
+    )
 }

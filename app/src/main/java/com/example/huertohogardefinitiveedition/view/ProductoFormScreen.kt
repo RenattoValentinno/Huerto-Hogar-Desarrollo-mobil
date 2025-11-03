@@ -32,6 +32,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.huertohogardefinitiveedition.viewmodel.DrawerMenuViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -221,20 +222,20 @@ fun ProductoFormScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        // 1. Calculamos el nuevo stock
-                        val nuevoStock = stock - cantidadNum
+                        // 1. Damos la orden al singleton del ViewModel para que actualice el stock
+                        DrawerMenuViewModel.instance?.actualizarStock(nombre, cantidadNum)
 
-                        // 2. Llamamos al repositorio para que actualice el valor
-                        ResenaRepository.actualizarStock(nombre, nuevoStock)
-
+                        // 2. Guardamos en el historial local
                         val pedido = Producto(
                             nombre = nombre,
                             precio = NumberFormat.getCurrencyInstance(Locale("es", "CL")).format(total),
-                            stock = 0, // Placeholder, ya que este modelo es para historial
+                            stock = 0,
                             cantidad = cantidadNum.toString(),
                             direccion = direccionPerfil
                         )
                         PedidoHistorial.agregar(pedido)
+
+                        // 3. Cerramos el diálogo y navegamos
                         mostrarDialogoBoleta = false
                         navController.navigate("historial_pedidos")
                     }

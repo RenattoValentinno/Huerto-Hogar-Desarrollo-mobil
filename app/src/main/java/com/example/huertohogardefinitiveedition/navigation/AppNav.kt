@@ -23,10 +23,14 @@ import com.example.huertohogardefinitiveedition.view.HistorialPedidosScreen
 import com.example.huertohogardefinitiveedition.view.ProductoFormScreen
 import com.example.huertohogardefinitiveedition.view.QrScannerScreen
 import com.example.huertohogardefinitiveedition.viewmodel.QrViewModel
+import com.example.huertohogardefinitiveedition.viewmodel.DrawerMenuViewModel
 
 @Composable
 fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
     val navController = rememberNavController()
+
+    val drawerMenuViewModel: DrawerMenuViewModel = viewModel()
+
 
     NavHost(navController = navController, startDestination = "login") {
 
@@ -47,7 +51,11 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
             arguments = listOf(navArgument("username") { type = NavType.StringType })
         ) { backStackEntry ->
             val usernameArg = backStackEntry.arguments?.getString("username") ?: ""
-            DrawerMenu(username = usernameArg, navController = navController)
+            DrawerMenu(
+                username = usernameArg,
+                navController = navController,
+                viewModel = drawerMenuViewModel
+            )
         }
 
         // --- Rutas de Productos y Herramientas ---
