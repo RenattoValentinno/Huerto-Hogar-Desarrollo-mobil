@@ -225,14 +225,7 @@ fun DrawerMenu(
                                     navController.navigate(Routes.Block)
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Reseñas") },
-                                leadingIcon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = null) },
-                                onClick = {
-                                    menuOpen = false
-                                    navController.navigate(Routes.Resena)
-                                }
-                            )
+
                             DropdownMenuItem(
                                 text = { Text("Carrito (proximamente)") },
                                 leadingIcon = { Icon(Icons.Default.History, contentDescription = null) },

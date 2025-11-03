@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -85,8 +87,8 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
             RecuperarContrasenaScreen(navController = navController)
         }
 
-        // Gestión de datos personales
-        composable("gestion") {
+        // Gestión historial pedidos
+        composable("historial_pedidos") {
 
             GestionPerfilScreen(navController = navController)
         }
@@ -97,13 +99,9 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
             GestionUsuarioScreen(navController = navController)
         }
 
-        //  Historial de pedidos
+        // 🛒 Historial de pedidos (versión con lista en memoria)
         composable("historial_pedidos") {
-            //remplazar quien tenga esa parte
-
-            SimpleStub("Pantalla: Historial de pedidos")
-
-
+            com.example.huertohogardefinitiveedition.view.HistorialPedidosScreen()
         }
         //  block
         composable("block") {
@@ -112,12 +110,7 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
             SimpleStub("Pantalla: block")
         }
 
-        //  reseñas
-        composable("resena") {
-            //remplazar quien tenga esa parte
 
-            SimpleStub("Pantalla: Reseñas")
-        }
 
         //  carrito de compras
         composable("carrito") {
