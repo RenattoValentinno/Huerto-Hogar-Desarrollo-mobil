@@ -1,15 +1,17 @@
 package com.example.huertohogardefinitiveedition.data.model
 
+
 // Representa a un usuario del sistema
 data class Credential(
-    val idUsuario: Int = 0,
-    val nombre: String,
-    val correo: String,
-    val usuario: String,
-    val telefono: String,
-    val direccion: String,
-    val password: String
+    val idUsuario: Int = 0,            // ID autogenerado (puede manejarlo Room más adelante)
+    val nombre: String,                // Nombre completo
+    val correo: String,                // Correo electrónico
+    val usuario: String,               // Nombre de usuario único
+    val telefono: String,              // Teléfono (9 dígitos)
+    val direccion: String,             // Dirección de entrega
+    val password: String               // Contraseña
 ) {
+
     companion object {
         // Usuario administrador por defecto
         val Admin = Credential(
@@ -23,4 +25,5 @@ data class Credential(
         )
     }
 }
+
 

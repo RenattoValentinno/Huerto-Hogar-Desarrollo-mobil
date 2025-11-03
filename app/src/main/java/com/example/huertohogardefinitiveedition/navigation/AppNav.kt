@@ -1,7 +1,11 @@
 package com.example.huertohogardefinitiveedition.navigation
 
 import android.net.Uri
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,24 +22,27 @@ import com.example.huertohogardefinitiveedition.view.ProductoFormScreen
 import com.example.huertohogardefinitiveedition.view.QrScannerScreen
 import com.example.huertohogardefinitiveedition.viewmodel.QrViewModel
 
+
+
+
 @Composable
 fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "login") {
 
-        // --- RUTA PRINCIPAL DE LOGIN ---
+        // Login
         composable("login") {
             LoginScreen(navController = navController)
         }
 
-        // --- RUTAS DEL MENÚ PRINCIPAL (DrawerMenu) ---
+        // Drawer (
         composable(
             route = "DrawerMenu/{username}",
             arguments = listOf(navArgument("username") { type = NavType.StringType })
         ) { backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username").orEmpty()
-            DrawerMenu(username = username, navController = navController)
+            val usernameArg = backStackEntry.arguments?.getString("username") ?: ""
+            DrawerMenu(username = usernameArg, navController = navController)
         }
 
         composable("QRScannerScreen") {
@@ -66,20 +73,21 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
             )
         }
 
-        // --- RUTAS NUEVAS (¡CORREGIDAS!) ---
+        //RUTAS NUEVAS
 
-        // Desde LoginScreen
+        // Registro
         composable("registrarse") {
             RegistrarseScreen(navController = navController)
         }
 
-        // Desde LoginScreen
+        // Recuperar contraseña
         composable("recuperar_contrasena") {
             RecuperarContrasenaScreen(navController = navController)
         }
 
-        // Desde el menú de DrawerMenu
-        composable("gestion_perfil") {
+        // Gestión de datos personales
+        composable("gestion") {
+
             GestionPerfilScreen(navController = navController)
         }
 
@@ -88,5 +96,39 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
         composable("gestion_usuarios") {
             GestionUsuarioScreen(navController = navController)
         }
+
+        //  Historial de pedidos
+        composable("historial_pedidos") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: Historial de pedidos")
+
+
+        }
+        //  block
+        composable("block") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: block")
+        }
+
+        //  reseñas
+        composable("resena") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: Reseñas")
+        }
+
+        //  carrito de compras
+        composable("carrito") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: Proximamente carrito de compras")
+        }
     }
+}
+@Composable
+private fun SimpleStub(texto: String) {
+    // Stub para que compile si aún no tienes esas pantallas construidas
+    Text(text = texto, modifier = Modifier.padding(24.dp))
 }

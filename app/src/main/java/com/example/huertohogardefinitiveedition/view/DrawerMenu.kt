@@ -2,20 +2,6 @@ package com.example.huertohogardefinitiveedition.view
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -37,10 +23,24 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.huertohogardefinitiveedition.R
 import com.example.huertohogardefinitiveedition.data.model.Categoria
+import com.example.huertohogardefinitiveedition.data.model.Credential
 import com.example.huertohogardefinitiveedition.data.model.ProductoItem
 import com.example.huertohogardefinitiveedition.data.session.SessionManager
+private object Routes {
+    const val Login = "login"
+    const val GestionPerfil = "gestion"          // o "gestion_usuario"
+    const val GestionUsuarios = "gestion_usuarios"      // o "Gestion"
+    const val HistorialPedidos = "historial_pedidos"
+    const val QRScanner = "QRScannerScreen"
+    const val ProductoFormBase = "ProductoFormScreen"   // define tu destino con 3 args
+    const val Carrito = "carrito"
 
-// --- TU LISTA DE PRODUCTOS (SE MANTIENE INTACTA) ---
+    const val Block = "block"
+
+    const val Resena = "resena"
+}
+
+//LISTA DE CATEGORÍAS Y PRODUCTOS
 val listaDeCategorias = listOf(
     Categoria(
         nombre = "Frutas",
@@ -136,94 +136,152 @@ val listaDeCategorias = listOf(
     )
 )
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawerMenu(
     username: String,
     navController: NavController
 ) {
-    // Definimos el esquema de colores para usarlo en toda la pantalla
+    // Paleta de colores local
     val huertoHogarColors = lightColorScheme(
-        primary = Color(0xFF4CAF50),
-        onPrimary = Color.White,
-        secondary = Color(0xFFFF9800),
+        primary     = Color(0xFF4CAF50),
+        onPrimary   = Color.White,
+        secondary   = Color(0xFFFF9800),
         onSecondary = Color.White,
-        surface = Color(0xFFFFF8F5),
-        onSurface = Color(0xFF3A3A3A)
+        surface     = Color(0xFFFFF8F5),
+        onSurface   = Color(0xFF3A3A3A)
     )
 
-    // --- LÓGICA DE SESIÓN (DE TU COMPAÑERA) ---
-    val currentUser = SessionManager.currentUser
-    val displayName = currentUser?.nombre ?: username
-    val isAdmin = currentUser?.usuario?.equals("admin", ignoreCase = true) ?: false
-    var menuOpen by remember { mutableStateOf(false) }
+    // Sesión
+    val current = SessionManager.currentUser
+    val displayName = when {
+        !current?.nombre.isNullOrBlank()  -> current!!.nombre
+        !current?.usuario.isNullOrBlank() -> current!!.usuario
+        else -> username
+    }
+    // Admin
+    val isAdmin = (current?.idUsuario == Credential.Admin.idUsuario) || (current?.usuario?.equals(Credential.Admin.usuario, ignoreCase = true) == true)
 
-    // --- TU ESTADO PARA LAS CATEGORÍAS (SE MANTIENE) ---
+    // UI state
+    var menuOpen by remember { mutableStateOf(false) }
     var categoriaSeleccionada by remember { mutableStateOf(listaDeCategorias.first()) }
 
     MaterialTheme(colorScheme = huertoHogarColors) {
         Scaffold(
+            // TOP APP BAR
             topBar = {
                 TopAppBar(
-                    title = { Text("Huerto Hogar") },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    actions = {
-                        // Mostramos el nombre del usuario y el menú desplegable
-                        Text(
-                            text = displayName,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(end = 8.dp)
-                        )
-                        IconButton(onClick = { menuOpen = true }) {
-                            Icon(Icons.Default.MoreVert, "Menú", tint = MaterialTheme.colorScheme.onPrimary)
+                    title = {
+                        Column {
+                            Text(
+                                text = "Perfil: $displayName",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                            val correo = current?.correo
+                            if (!correo.isNullOrBlank()) {
+                                Text(
+                                    text = correo,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
+                                )
+                            }
                         }
-
-                        // Menú desplegable con las opciones de sesión y perfil
-                        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    },
+                    actions = {
+                        IconButton(onClick = { menuOpen = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Menú de perfil",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = menuOpen,
+                            onDismissRequest = { menuOpen = false }
+                        ) {
                             DropdownMenuItem(
                                 text = { Text("Mi Perfil") },
-                                leadingIcon = { Icon(Icons.Default.Person, null) },
+                                leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                                 onClick = {
                                     menuOpen = false
-                                    navController.navigate("gestion_perfil")
+                                    navController.navigate(Routes.GestionPerfil)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Historial de pedidos") },
+                                leadingIcon = { Icon(Icons.Default.History, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.HistorialPedidos)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Block") },
+                                leadingIcon = { Icon(Icons.Default.Apps, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.Block)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Reseñas") },
+                                leadingIcon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.Resena)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Carrito (proximamente)") },
+                                leadingIcon = { Icon(Icons.Default.History, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.Carrito)
                                 }
                             )
                             if (isAdmin) {
                                 DropdownMenuItem(
-                                    text = { Text("Gestionar Usuarios") },
-                                    leadingIcon = { Icon(Icons.Default.AdminPanelSettings, null) },
+                                    text = { Text("Gestionar usuarios") },
+                                    leadingIcon = { Icon(Icons.Default.AdminPanelSettings, contentDescription = null) },
                                     onClick = {
                                         menuOpen = false
-                                        navController.navigate("gestion_usuarios")
+                                        navController.navigate(Routes.GestionUsuarios)
                                     }
                                 )
                             }
                             Divider()
                             DropdownMenuItem(
-                                text = { Text("Cerrar Sesión") },
-                                leadingIcon = { Icon(Icons.Default.Logout, null) },
+                                text = { Text("Cerrar sesión") },
+                                leadingIcon = { Icon(Icons.Default.Logout, contentDescription = null) },
                                 onClick = {
                                     menuOpen = false
                                     SessionManager.logout()
-                                    // Navega al login y limpia todo el historial de navegación
-                                    navController.navigate("login") { popUpTo(0) { inclusive = true } }
+                                    navController.navigate(Routes.Login) {
+                                        popUpTo(0) { inclusive = true }
+                                        launchSingleTop = true
+                                    }
                                 }
                             )
                         }
-                    }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 )
             }
         ) { innerPadding ->
-            // --- TU INTERFAZ DE CATÁLOGO (SE MANTIENE, CON EL PADDING DEL SCAFFOLD) ---
-            Column(modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()) {
-                // Tu LazyRow con las categorías (sin cambios)
+
+            //categorías + productos
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                // categorías + botón QR
                 LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -234,7 +292,7 @@ fun DrawerMenu(
                     item {
                         FilterChip(
                             selected = false,
-                            onClick = { navController.navigate("QRScannerScreen") },
+                            onClick = { navController.navigate(Routes.QRScanner) },
                             label = { Text("Escanear") },
                             leadingIcon = { Icon(Icons.Default.QrCodeScanner, contentDescription = "QR") }
                         )
@@ -249,7 +307,7 @@ fun DrawerMenu(
                     }
                 }
 
-                // Tu LazyColumn con los productos (sin cambios)
+                // Lista de productos por categoría
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     items(categoriaSeleccionada.productos) { producto ->
                         Card(
@@ -261,7 +319,9 @@ fun DrawerMenu(
                                 val nombreNav = Uri.encode(producto.nombre)
                                 val precioNav = producto.precio
                                 val descripcionNav = Uri.encode(producto.descripcion)
-                                navController.navigate("ProductoFormScreen/$nombreNav/$precioNav/$descripcionNav")
+                                navController.navigate(
+                                    "${Routes.ProductoFormBase}/$nombreNav/$precioNav/$descripcionNav"
+                                )
                             }
                         ) {
                             Row(
@@ -306,7 +366,7 @@ fun DrawerMenu(
                     }
                 }
 
-                // Tu Footer (sin cambios)
+                // Footer
                 Text(
                     text = "@ 2025 Huerto Hogar App",
                     style = MaterialTheme.typography.bodySmall,

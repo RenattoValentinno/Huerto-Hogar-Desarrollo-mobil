@@ -25,8 +25,12 @@ class LoginViewModel : ViewModel() {
         uiState = uiState.copy(password = newValue, error = null)
     }
 
-    // Función simple para mostrar errores desde la UI
+    // Reemplaza a "onError": así seteas/limpias el error desde la UI
     fun setError(message: String?) {
         uiState = uiState.copy(error = message)
+    }
+
+    fun setLoading(loading: Boolean) {
+        uiState = uiState.copy(isLoading = loading)
     }
 }

@@ -21,12 +21,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.huertohogardefinitiveedition.R
 import com.example.huertohogardefinitiveedition.data.repository.UserRepository
 import com.example.huertohogardefinitiveedition.data.session.SessionManager
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,53 +40,64 @@ fun LoginScreen(
     val state = vm.uiState
     var showPass by remember { mutableStateOf(false) }
 
-    // Usamos el tema de colores de tu compañera que está muy bien definido
-    val huertoHogarColors = lightColorScheme(
-        primary = Color(0xFF4CAF50),
-        onPrimary = Color.White,
-        secondary = Color(0xFFFF9800),
-        onSecondary = Color.White,
-        surface = Color(0xFFFFF8F5),
-        onSurface = Color(0xFF3A3A3A)
+    val ColorScheme = lightColorScheme(
+        primary    = Color(0xFF4CAF50),
+        onPrimary  = Color.White,
+        secondary  = Color(0xFFFF9800),
+        onSecondary= Color.White,
+        surface    = Color(0xFFFFF8F5),
+        onSurface  = Color(0xFF3A3A3A)
     )
 
-    MaterialTheme(colorScheme = huertoHogarColors) {
+    MaterialTheme(colorScheme = ColorScheme) {
         Scaffold { innerPadding ->
             Column(
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.surface),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 Text(
                     text = "Bienvenido a Huerto Hogar!",
-                    style = MaterialTheme.typography.headlineSmall,
+                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // Asegúrate de tener una imagen `logo_huerto_hogar` en `res/drawable`
-                // o cámbiala por `R.drawable.logoduoc`
                 Image(
-                    painter = painterResource(id = R.drawable.logo_huerto_hogar),
+                    painter = androidx.compose.ui.res.painterResource(id = R.drawable.logo_huerto_hogar),
                     contentDescription = "Logo App",
-                    modifier = Modifier.height(150.dp).padding(bottom = 24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .padding(bottom = 5.dp),
                     contentScale = ContentScale.Fit
                 )
+
+                Spacer(Modifier.height(30.dp))
 
                 OutlinedTextField(
                     value = state.username,
                     onValueChange = vm::onUsernameChange,
                     label = { Text("Usuario o correo") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth(0.9f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(vertical = 4.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor   = MaterialTheme.colorScheme.secondary,
+                        unfocusedBorderColor = Color(0xFFBDBDBD),
+                        cursorColor          = MaterialTheme.colorScheme.secondary,
+                        focusedLabelColor    = MaterialTheme.colorScheme.secondary,
+                        unfocusedLabelColor  = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
                 )
-
-                Spacer(Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = state.password,
@@ -93,51 +107,82 @@ fun LoginScreen(
                     visualTransformation = if (showPass) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         IconButton(onClick = { showPass = !showPass }) {
-                            Icon(if (showPass) Icons.Default.VisibilityOff else Icons.Default.Visibility, null)
+                            val icon = if (showPass)
+                                androidx.compose.material.icons.Icons.Default.VisibilityOff
+                            else
+                                androidx.compose.material.icons.Icons.Default.Visibility
+                            Icon(icon, contentDescription = null)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(0.9f)
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(vertical = 4.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor   = MaterialTheme.colorScheme.secondary,
+                        unfocusedBorderColor = Color(0xFFBDBDBD),
+                        cursorColor          = MaterialTheme.colorScheme.secondary,
+                        focusedLabelColor    = MaterialTheme.colorScheme.secondary,
+                        unfocusedLabelColor  = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
                 )
 
+                Spacer(Modifier.height(30.dp))
+
                 if (state.error != null) {
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         text = state.error ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(top = 8.dp)
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                Spacer(Modifier.height(24.dp))
-
                 Button(
                     onClick = {
+                        // Validación mínima local
                         if (state.username.isBlank() || state.password.isBlank()) {
-                            vm.setError("Debes completar todos los campos")
+                            vm.setError("Debes completar usuario/correo y contraseña")
                             return@Button
                         }
-                        // Lógica de login directa con el nuevo repositorio
+
+                        // Login directo contra el repositorio de usuarios en memoria
                         val result = UserRepository.login(state.username, state.password)
                         result.onSuccess { user ->
-                            SessionManager.login(user) // Inicia la sesión
+                            // Guardar sesión
+                            SessionManager.login(user)
+
+                            // Navegar pasando el usuario real
                             val uname = Uri.encode(user.usuario)
                             navController.navigate("DrawerMenu/$uname") {
                                 popUpTo("login") { inclusive = true }
+                                launchSingleTop = true
                             }
                         }.onFailure { e ->
                             vm.setError(e.message ?: "Credenciales inválidas")
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(0.6f).height(48.dp),
-                    shape = RoundedCornerShape(50)
+                    enabled = !state.isLoading,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White
+                    ),
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
+                    modifier = Modifier
+                        .fillMaxWidth(0.6f)
+                        .height(44.dp)
                 ) {
-                    Text("Iniciar Sesión")
+                    Text(if (state.isLoading) "Validando..." else "Iniciar Sesión")
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(30.dp))
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = "Crear cuenta",
@@ -157,3 +202,9 @@ fun LoginScreen(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    val navController = rememberNavController()
+    LoginScreen(navController = navController)
+}
