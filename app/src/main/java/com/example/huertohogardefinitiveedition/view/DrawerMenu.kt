@@ -33,6 +33,11 @@ private object Routes {
     const val HistorialPedidos = "historial_pedidos"
     const val QRScanner = "QRScannerScreen"
     const val ProductoFormBase = "ProductoFormScreen"   // define tu destino con 3 args
+    const val Carrito = "carrito"
+
+    const val Block = "block"
+
+    const val Resena = "resena"
 }
 
 //LISTA DE CATEGORÍAS Y PRODUCTOS
@@ -196,6 +201,30 @@ fun DrawerMenu(
                                 onClick = {
                                     menuOpen = false
                                     navController.navigate(Routes.HistorialPedidos)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Block") },
+                                leadingIcon = { Icon(Icons.Default.Apps, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.Block)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Reseñas") },
+                                leadingIcon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.Resena)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Carrito (proximamente)") },
+                                leadingIcon = { Icon(Icons.Default.History, contentDescription = null) },
+                                onClick = {
+                                    menuOpen = false
+                                    navController.navigate(Routes.Carrito)
                                 }
                             )
                             if (isAdmin) {

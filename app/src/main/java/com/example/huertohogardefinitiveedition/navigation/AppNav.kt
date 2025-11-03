@@ -102,6 +102,28 @@ fun AppNav(hasCameraPermission: Boolean, onRequestPermission: () -> Unit) {
             //remplazar quien tenga esa parte
 
             SimpleStub("Pantalla: Historial de pedidos")
+
+
+        }
+        //  block
+        composable("block") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: block")
+        }
+
+        //  reseñas
+        composable("resena") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: Reseñas")
+        }
+
+        //  carrito de compras
+        composable("carrito") {
+            //remplazar quien tenga esa parte
+
+            SimpleStub("Pantalla: Proximamente carrito de compras")
         }
     }
 }
