@@ -1,74 +1,86 @@
 package com.example.login002v.navigation
 
-import android.net.Uri
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
 import androidx.navigation.navArgument
-import com.example.login002v.ui.home.MuestraDatosScreen
+
 import com.example.login002v.ui.login.LoginScreen
-import com.example.login002v.view.DrawerMenu
-import com.example.login002v.view.ProductoFormScreen
 import com.example.login002v.ui.registro.RegistrarseScreen
+import com.example.login002v.view.DrawerMenu
+import com.example.login002v.ui.gestion.GestionUsuarioScreen
+import com.example.login002v.ui.gestion.RecuperarContrasenaScreen
+import com.example.login002v.ui.gestion.GestionPerfilScreen
 
 @Composable
-
-
-fun AppNav(){
-
-    //veamos controlador
+fun AppNav() {
     val navController = rememberNavController()
-    NavHost( navController= navController, startDestination = "login")
-    {
-        composable("login"){
-            LoginScreen(navController= navController)
-        }//fin composable 1
 
-        //route="muestraDatos/{username}"
-        composable(
-            route="DrawerMenu/{username}",
-            arguments = listOf(
-                navArgument("username"){
-                    type= NavType.StringType
-                }
-            )//fin List Of
-        )//fin composable 2
-        { // inicio
-            backStackEntry ->
-            val username = backStackEntry.arguments?.getString("username").orEmpty()
-            //(username=username,navController= navController )
-            DrawerMenu(username=username,navController= navController )
+    // (Opcional) paleta rapidita para todo el nav si quieres
+    val colors = lightColorScheme()
+    MaterialTheme(colorScheme = colors) {
+
+        NavHost(
+            navController = navController,
+            startDestination = "login"
+        ) {
+            // Login
+            composable("login") {
+                LoginScreen(navController = navController)
+            }
+
+            // Registro
+            composable("registrarse") {
+                RegistrarseScreen(navController = navController)
+            }
+
+            // Drawer (
+            composable(
+                route = "DrawerMenu/{username}",
+                arguments = listOf(navArgument("username") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val usernameArg = backStackEntry.arguments?.getString("username") ?: ""
+                DrawerMenu(username = usernameArg, navController = navController)
+            }
+
+            // Gestión de datos personales
+            composable("gestion_usuario") {
+
+                GestionPerfilScreen(navController = navController)
+            }
+
+            //  Historial de pedidos
+            composable("historial_pedidos") {
+                //remplazar quien tenga esa parte
+
+                SimpleStub("Pantalla: Historial de pedidos")
+            }
+
+            // Gestión de usuarios (SOLO admin)
+            composable("Gestion") {
+                GestionUsuarioScreen(navController = navController)
+            }
+
+            // Recuperar contraseña
+            composable("recuperar_contrasena") {
+                RecuperarContrasenaScreen(navController = navController)
+            }
         }
-
-
-        composable(
-            route="ProductoFormScreen/{nombre}/{precio}",
-                arguments = listOf(
-                navArgument("nombre"){type= NavType.StringType },
-                navArgument("precio"){type= NavType.StringType },
-            )//fin List Of
-        )//fin composable 3
-        {// inicio
-                backStackEntry ->
-            val nombre = Uri.decode(backStackEntry.arguments?.getString("nombre") ?:"")
-            val precio = backStackEntry.arguments?.getString("precio")?:""
-
-            ProductoFormScreen(navController= navController, nombre =nombre,precio = precio )
-        }
-        //ruta de registro usuario
-        composable("registrarse") {
-            RegistrarseScreen(navController = navController)
-        }
-
-
-
-
-
     }
+}
 
-
-
-}//fin AppNav
+@Composable
+private fun SimpleStub(texto: String) {
+    // Stub para que compile si aún no tienes esas pantallas construidas
+    Text(text = texto, modifier = Modifier.padding(24.dp))
+}
