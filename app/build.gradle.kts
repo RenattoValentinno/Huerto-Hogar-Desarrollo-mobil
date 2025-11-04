@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 
+
     // Agregar esto para habilitar KAPT
 
     kotlin("kapt")
